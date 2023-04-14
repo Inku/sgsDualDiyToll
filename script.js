@@ -45,11 +45,7 @@ function removeElementsByClass(className) {
 function drawCard() {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-
-
     const card = document.getElementById('card');
-
 
     drawCardName(ctx, document.getElementById('name').value);
 
@@ -81,20 +77,38 @@ function drawCard() {
 function drawCardName(ctx, name) {
     const x = 90;
     const yStart = 280;
-    const yOffset = 100;
-
-    //先画黑色底色
+    const yOffset = 115;
     ctx.font = "95px JinMeiMaoCao";
-    ctx.lineWidth = 9;
+
+    //绘制阴影
+    ctx.shadowColor = "rgba(41, 66, 73, 1)"; // 设置阴影颜色为黑色
+    ctx.shadowBlur = 0; // 设置阴影模糊程度
+    ctx.shadowOffsetX = 6; // 水平偏移量设置为0
+    ctx.shadowOffsetY = 9; // 垂直偏移量设置为0
+    for (let i = 0; i < name.length; i++) {
+        ctx.fillText(name[i], x, yStart + yOffset * i);
+    }
+    ctx.shadowColor = "rgba(0, 0, 0, 0)";
+
+    //外侧两像素白色描边
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = "white";
+    for (let i = 0; i < name.length; i++) {
+        ctx.strokeText(name[i], x, yStart + yOffset * i);
+    }
+
+    //黑色底色
+    ctx.lineWidth = 8;
     ctx.strokeStyle = "black";
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
+    ctx.shadowColor = "rgba(0, 0, 0, 0)";
     for (let i = 0; i < name.length; i++) {
         ctx.strokeText(name[i], x, yStart + yOffset * i);
         ctx.fillText(name[i], x, yStart + yOffset * i);
     }
 
-    //先画前景白色
+    //前景白色
     ctx.font = "95px JinMeiMaoCao";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
