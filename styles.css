@@ -1,0 +1,183 @@
+@font-face {
+    font-family: 'SiTongLS';
+    src: url('四通利方隶书体繁.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'JinMeiMaoCao';
+    src: url('金梅毛草行国际码.ttf') format('truetype');
+}
+
+html,
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+.preview {
+    flex: 1;
+    padding: 0 20px;
+    max-width: 50%;
+}
+
+.editor {
+    padding: 0 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+input,
+textarea,
+button {
+    margin: 5px 0;
+}
+
+fieldset {
+    border: 1px solid #cccccc;
+    padding: 5px;
+    margin: 5px 0;
+}
+
+legend {
+    font-weight: bold;
+    padding: 0 5px;
+}
+
+.card-qi-bing {
+    font-family: 'SiTongLS';
+    font-size: 36px;
+    color: white;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+#card-container {
+    display: flex;
+}
+
+#card-canvas {
+    width: calc(85vh * 71.21%);
+    height: 85vh;
+    padding: 20px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+button:hover {
+    background-color: #0056B3;
+}
+
+input[type="number"] {
+    width: 70px;
+}
+
+input[type="text"] {
+    width: 100%;
+}
+
+.qi-bing-item {
+    display: inline-block;
+    background-color: #f1f1f1;
+    padding: 2px 8px;
+    margin: 2px;
+    border-radius: 5px;
+}
+
+.qi-bing-remove-btn {
+    margin-left: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    color: red;
+}
+
+.qi-bing-remove-btn:hover {
+    color: #b30000;
+}
+
+.skill-toggle {
+    display: inline-block;
+    cursor: pointer;
+    background-color: #f1f1f1f1;
+    padding: 2px 5px;
+    margin: 0 5px;
+    border-radius: 5px;
+}
+
+/* 新增样式 */
+.label-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.editor {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.editor>* {
+    width: 100%;
+}
+
+form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+form .form-inline {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.card-title {
+    font-family: 'JinMeiMaoCao';
+    font-size: 36px;
+    color: #333;
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+}
+
+input[type="file"] {
+    padding: 5px;
+}
+
+input[type="radio"] {
+    margin-right: 5px;
+}

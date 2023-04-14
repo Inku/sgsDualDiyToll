@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡牌生成器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="preview">
+            <div id="card-container">
+                <div id="card">
+                    <canvas id="card-canvas" width="942" height="1323">
+                        <p id="card-title"></p>
+                        <p id="card-faction"></p>
+                        <p id="card-score"></p>
+                        <p id="card-health"></p>
+                        <ul id="card-skills"></ul>
+                    </canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="editor">
+            <form class="form">
+                <fieldset>
+                    <legend>势力:</legend>
+                    <label><input type="radio" name="faction" value="魏" checked> 魏</label>
+                    <label><input type="radio" name="faction" value="蜀"> 蜀</label>
+                    <label><input type="radio" name="faction" value="吴"> 吴</label>
+                    <label><input type="radio" name="faction" value="群"> 群</label>
+                </fieldset>
+
+                <label for="score">分数:</label>
+                <input type="number" id="score">
+
+                <label for="health">体力:</label>
+                <input type="number" id="health">
+
+                <label for="name">名称:</label>
+                <input type="text" id="name">
+
+                <label for="title">称号:</label>
+                <input type="text" id="title">
+
+                <label for="qi-bing">奇兵 (按回车确认):</label>
+                <input type="text" id="qi-bing">
+                <div id="qi-bing-list"></div>
+
+                <label for="image-upload">原画:</label>
+                <input type="file" id="image-upload" accept="image/*" onchange="uploadImage(event)">
+
+                <div id="skill-list"></div>
+                <button type="button" id="add-skill">添加技能</button>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
