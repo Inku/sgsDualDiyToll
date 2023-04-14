@@ -8,13 +8,35 @@ const canvas = document.getElementById('card-canvas');
 const qiBingInput = document.getElementById('qi-bing');
 const qiBingList = document.getElementById('qi-bing-list');
 const qiBings = [];
+const qiBingMap = { "杀": "殺", "闪": "閃" }
+
+WebFont.load({
+    custom: {
+        families: ['SIMLI', 'JinMeiMaoCao']
+    },
+    fontactive: function (familyName, fvd) {
+        // 当字体加载完成时，此回调函数将被触发
+        console.log('Font "' + familyName + '" has loaded.');
+    },
+    active: function () {
+        // 当所有字体都加载完成时，此回调函数将被触发
+        console.log('All fonts have loaded.');
+    }
+});
+
 
 qiBingInput.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
         event.preventDefault();
         if (this.value.trim() !== '') {
-            qiBings.push(this.value.trim());
+            var qibing = this.value.trim();
+            var fan = qiBingMap[qibing];
+            if (fan != undefined && fan.length > 0) {
+                qibing = fan;
+            }
+            qiBings.push(qibing);
             updateqiBingList();
+            drawCard();
             this.value = '';
         }
     }
@@ -26,7 +48,6 @@ window.onload = function () {
 
 function updateqiBingList() {
     qiBingList.innerHTML = qiBings.map((qiBing, index) => `<span>${qiBing} <button type="button" onclick="removeqiBing(${index})">删除</button></span>`).join('');
-    drawCard();
 }
 
 function removeqiBing(index) {
@@ -35,7 +56,7 @@ function removeqiBing(index) {
 }
 
 function removeElementsByClass(className) {
-    const elements = document.getElementsByClassName(className);
+    var elements = document.getElementsByClassName(className);
     // 遍历元素并从其父元素中删除它们
     while (elements.length > 0) {
         elements[0].parentNode.removeChild(elements[0]);
@@ -48,6 +69,7 @@ function drawCard() {
     const card = document.getElementById('card');
 
     drawCardName(ctx, document.getElementById('name').value);
+    drawCardQibing(ctx, qiBings);
 
     const faction = document.querySelector('input[name="faction"]:checked').value;
     const score = document.getElementById('score').value;
@@ -75,9 +97,9 @@ function drawCard() {
 
 
 function drawCardName(ctx, name) {
-    const x = 90;
-    const yStart = 280;
-    const yOffset = 115;
+    var x = 90;
+    var yStart = 280;
+    var yOffset = 115;
     ctx.font = "95px JinMeiMaoCao";
 
     //绘制阴影
@@ -109,11 +131,27 @@ function drawCardName(ctx, name) {
     }
 
     //前景白色
-    ctx.font = "95px JinMeiMaoCao";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
     for (let i = 0; i < name.length; i++) {
         ctx.fillText(name[i], x, yStart + yOffset * i);
+    }
+}
+
+function drawCardQibing(ctx, qiBings) {
+    ctx.font = "100px SIMLI";
+
+    var xStart = 830;
+    var xOffset = 130;
+    var y = 120;
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    for (let i = 0; i < qiBings.length; i++) {
+        ctx.strokeText(qiBings[i], xStart - i * xOffset, y);
+        ctx.fillText(qiBings[i], xStart - i * xOffset, y);
     }
 }
 
