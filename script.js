@@ -1,3 +1,15 @@
+WebFont.load({
+    custom: {
+        families: ['HanYiTianMaXing', 'SIMLI', 'JinMeiMaoCao', 'HuaKangXinZhuan']
+    },
+    fontactive: function (familyName, fvd) {
+        console.log('Font "' + familyName + '" has loaded.');
+    },
+    active: function () {
+        console.log('All fonts have loaded.');
+    }
+});
+
 const inputs = document.querySelectorAll('input, select');
 inputs.forEach(input => {
     input.addEventListener('input', drawCard);
@@ -10,44 +22,45 @@ const qiBingList = document.getElementById('qi-bing-list');
 const qiBings = [];
 const qiBingMap = { "杀": "殺", "闪": "閃" }
 
-WebFont.load({
-    custom: {
-        families: ['SIMLI', 'JinMeiMaoCao']
-    },
-    fontactive: function (familyName, fvd) {
-        // 当字体加载完成时，此回调函数将被触发
-        console.log('Font "' + familyName + '" has loaded.');
-    },
-    active: function () {
-        // 当所有字体都加载完成时，此回调函数将被触发
-        console.log('All fonts have loaded.');
-    }
-});
-
-
 qiBingInput.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
         event.preventDefault();
         if (this.value.trim() !== '') {
-            var qibing = this.value.trim();
-            var fan = qiBingMap[qibing];
+            let qibing = this.value.trim();
+            let fan = qiBingMap[qibing];
             if (fan != undefined && fan.length > 0) {
                 qibing = fan;
             }
             qiBings.push(qibing);
             updateqiBingList();
-            drawCard();
             this.value = '';
         }
     }
 });
 
-window.onload = function () {
-    drawCard();
-};
-
 function updateqiBingList() {
-    qiBingList.innerHTML = qiBings.map((qiBing, index) => `<span>${qiBing} <button type="button" onclick="removeqiBing(${index})">删除</button></span>`).join('');
+    qiBingList.innerHTML = qiBings.map((qiBing, index) => `<span draggable="true" ondragstart="dragStart(event, ${index})">${qiBing} <button class="qi-bing-remove-btn" type="button" onclick="removeqiBing(${index})">删除</button></span>`).join('');
+    drawCard();
+}
+
+qiBingList.addEventListener('dragover', (event) => {
+    event.preventDefault();
+});
+
+qiBingList.addEventListener('drop', (event) => {
+    event.preventDefault();
+    const targetIndex = Array.from(qiBingList.children).indexOf(event.target);
+    if (draggedIndex !== targetIndex) {
+        qiBings.splice(targetIndex, 0, qiBings.splice(draggedIndex, 1)[0]);
+        updateqiBingList();
+    }
+});
+
+let draggedIndex = null;
+
+function dragStart(event, index) {
+    draggedIndex = index;
+    event.dataTransfer.effectAllowed = 'move';
 }
 
 function removeqiBing(index) {
@@ -56,7 +69,7 @@ function removeqiBing(index) {
 }
 
 function removeElementsByClass(className) {
-    var elements = document.getElementsByClassName(className);
+    let elements = document.getElementsByClassName(className);
     // 遍历元素并从其父元素中删除它们
     while (elements.length > 0) {
         elements[0].parentNode.removeChild(elements[0]);
@@ -69,17 +82,16 @@ function drawCard() {
     const card = document.getElementById('card');
 
     drawCardName(ctx, document.getElementById('name').value);
+    drawCardTitle(ctx, document.getElementById('title').value);
+    drawCardScore(ctx, document.getElementById('score').value);
+    drawCardSkills(ctx, document.getElementById('card-skills'));
     drawCardQibing(ctx, qiBings);
 
     const faction = document.querySelector('input[name="faction"]:checked').value;
-    const score = document.getElementById('score').value;
     const health = document.getElementById('health').value;
-    const title = document.getElementById('title').value;
 
     document.getElementById('card-faction').innerText = `势力：${faction}`;
-    document.getElementById('card-score').innerText = `分数：${score}`;
     document.getElementById('card-health').innerText = `体力：${health}`;
-    document.getElementById('card-title').innerText = title;
 
     const cardSkills = document.getElementById('card-skills');
     cardSkills.innerHTML = '';
@@ -97,10 +109,10 @@ function drawCard() {
 
 
 function drawCardName(ctx, name) {
-    var x = 90;
-    var yStart = 280;
-    var yOffset = 115;
-    ctx.font = "95px JinMeiMaoCao";
+    let x = 130;
+    let yStart = 400;
+    let yOffset = 100;
+    ctx.font = "90px JinMeiMaoCao";
 
     //绘制阴影
     ctx.shadowColor = "rgba(41, 66, 73, 1)"; // 设置阴影颜色为黑色
@@ -138,12 +150,42 @@ function drawCardName(ctx, name) {
     }
 }
 
-function drawCardQibing(ctx, qiBings) {
-    ctx.font = "100px SIMLI";
+function drawCardTitle(ctx, title) {
+    let x = 80;
+    let yStart = 285;
+    let yOffset = 45;
+    ctx.font = "45px HuaKangXinZhuan";
 
-    var xStart = 830;
-    var xOffset = 130;
-    var y = 120;
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+    for (let i = 0; i < title.length; i++) {
+        ctx.fillText(title[i], x, yStart + yOffset * i);
+    }
+}
+
+function drawCardScore(ctx, score) {
+    let x = 120;
+    let y = 190;
+    ctx.font = "160px HanYiTianMaXing";
+
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "white";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+    ctx.strokeText(score, x, y);
+    ctx.fillText(score, x, y);
+}
+
+function drawCardSkills(ctx, skills){
+
+}
+
+function drawCardQibing(ctx, qiBings) {
+    ctx.font = "110px SIMLI";
+
+    let xStart = 830;
+    let xOffset = 130;
+    let y = 137;
 
     ctx.lineWidth = 2;
     ctx.strokeStyle = "black";
@@ -189,12 +231,12 @@ function updateSkillList() {
             <div>
                 <fieldset>
                     <legend>技能 ${index + 1}</legend>
-                    <label><input type="radio" name="skill-type-${index}" value="普通技能" checked onchange="updateSkill(${index}, 'type', this.value)"> 普通技能</label>
-                    <label><input type="radio" name="skill-type-${index}" value="伏击技能" onchange="updateSkill(${index}, 'type', this.value)"> 伏击技能</label>
+                    <label class="radio-label"><input type="radio" name="skill-type-${index}" value="普通技能" checked onchange="updateSkill(${index}, 'type', this.value)"> 普通技能</label>
+                    <label class="radio-label"><input type="radio" name="skill-type-${index}" value="伏击技能" onchange="updateSkill(${index}, 'type', this.value)"> 伏击技能</label>
                     <br>
-                    <label><input type="radio" name="skill-trigger-${index}" value="触发" checked onchange="updateSkill(${index}, 'trigger', this.value)"> 触发</label>
-                    <label><input type="radio" name="skill-trigger-${index}" value="主动" onchange="updateSkill(${index}, 'trigger', this.value)"> 主动</label>
-                    <label><input type="radio" name="skill-trigger-${index}" value="持续" onchange="updateSkill(${index}, 'trigger', this.value)"> 持续</label>
+                    <label class="radio-label"><input type="radio" name="skill-trigger-${index}" value="触发" checked onchange="updateSkill(${index}, 'trigger', this.value)"> 触发</label>
+                    <label class="radio-label"><input type="radio" name="skill-trigger-${index}" value="主动" onchange="updateSkill(${index}, 'trigger', this.value)"> 主动</label>
+                    <label class="radio-label"><input type="radio" name="skill-trigger-${index}" value="持续" onchange="updateSkill(${index}, 'trigger', this.value)"> 持续</label>
                     <br>
                     <label>发动次数:</label>
                     <label><input type="checkbox" id="skill-count-toggle-${index}" onchange="toggleSkillCount(${index})" ${skill.countEnabled ? 'checked' : ''}> </label>
@@ -243,3 +285,7 @@ function uploadImage(event) {
         reader.readAsDataURL(input.files[0]);
     }
 }
+
+window.onload = function () {
+    drawCard();
+};
