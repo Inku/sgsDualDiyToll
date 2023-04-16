@@ -10,7 +10,7 @@
 
 @font-face {
     font-family: 'HuaKangXinZhuan';
-    src: url('./fonts/华康新篆-W5.ttf') format('truetype');
+    src: url('./fonts/华康新篆体.ttf') format('truetype');
 }
 
 @font-face {
@@ -77,7 +77,7 @@ legend {
     position: relative;
     width: 620px;
     max-width: 100%;
-    padding-top: 141.94%;
+    padding-top: 140.34%;
 }
 
 #card-canvas {
