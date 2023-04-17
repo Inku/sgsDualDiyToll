@@ -1,6 +1,6 @@
 WebFont.load({
     custom: {
-        families: ['HanYiTianMaXing', 'SIMLI', 'JinMeiMaoCao', 'HuaKangXinZhuan']
+        families: ['HanYiTianMaXing', 'SIMLI', 'JinMeiMaoCao', 'HuaKangXinZhuan', 'HanYiZhongYuan']
     },
     fontactive: function (familyName, fvd) {
         console.log('Font "' + familyName + '" has loaded.');
@@ -11,6 +11,8 @@ WebFont.load({
 });
 
 const canvas = document.getElementById('card-canvas');
+const canvasWidth = parseInt(canvas.getAttribute("width"), 10);
+const canvasHeight = parseInt(canvas.getAttribute("height"), 10);
 
 const inputs = document.querySelectorAll('input, select');
 inputs.forEach(input => {
@@ -28,6 +30,9 @@ function drawCard() {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const card = document.getElementById('card');
+
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     const faction = document.querySelector('input[name="faction"]:checked').value;
     const health = document.getElementById('health').value;
@@ -94,8 +99,8 @@ function drawCardTitle(ctx, title) {
 }
 
 function drawCardScore(ctx, score) {
-    let x = 120;
-    let y = 195;
+    const x = 120;
+    const y = 195;
     ctx.font = "160px HanYiTianMaXing";
 
     ctx.lineWidth = 4;
@@ -107,17 +112,79 @@ function drawCardScore(ctx, score) {
 }
 
 function drawCardSkills(ctx, skills, faction) {
+    const maxWidth = 57;//最大边缘宽度
+    const minWidth = 19;//最小边缘宽度
+
+    const maxMaskY = 957;//遮罩最低高度
+    const bottomMaskY = canvasHeight - 96;//遮罩区最低处Y坐标
+
+    //计算技能文字区域总体高度
+    let textAreaHeight = 0;
     if (skills.length > 0) {
         skills.forEach(skill => {
-            drawSkillName(ctx, skill, faction)
+            textAreaHeight += getSkillAreaHeight(ctx, skill);
+            textAreaHeight += 2 * minWidth;//多个技能时增加两倍最小间距
         });
+        textAreaHeight - 2 * minWidth;
     }
+    console.log("textAreaHeight:",textAreaHeight)
+
+    //顶部边缘宽度
+    let topEdge;
+    //遮罩区起始Y坐标
+    let startY
+
+    if (textAreaHeight <= (bottomMaskY - maxMaskY - 2 * maxWidth)) {
+        //技能区域小于最小宽度：使用最大边缘宽度
+        startY = maxMaskY;
+        topEdge = maxWidth;
+    } else if (textAreaHeight > (bottomMaskY - maxMaskY - 2 * maxWidth) && textAreaHeight <= (bottomMaskY - maxMaskY - 2 * minWidth)) {
+        //技能区域大于最小宽度，小于未扩展最大宽度：均分上下边框宽度
+        startY = maxMaskY;
+        topEdge = (bottomMaskY - maxMaskY - textAreaHeight) / 2;
+    } else {
+        //技能区域大于未扩展最大宽度：向上扩展起始Y坐标
+        startY = maxMaskY - (textAreaHeight - (bottomMaskY - maxMaskY - 2 * minWidth));
+        topEdge = minWidth;
+    }
+
+    for (let i = 0; i < skills.length; i++) {
+        let skill = skills[i];
+
+        let skillHeight = getSkillAreaHeight(ctx, skill);
+
+        let maskEndY;
+        if (i == skills.length - 1) {
+            //最后一个遮罩区覆盖剩余部分   
+            maskEndY = canvasHeight;
+        } else {
+            maskEndY = startY + topEdge + skillHeight + minWidth;
+        }
+        drawCardSkillMask(ctx, startY, maskEndY, i);
+        drawSkillName(ctx, skill, faction, startY, topEdge);
+        drawSkillTrigger(ctx, skill, startY, topEdge);
+        drawSkillDetail(ctx, skill, startY, topEdge);
+        startY = maskEndY;
+        topEdge = minWidth;
+    }
+}
+
+function drawCardSkillMask(ctx, startY, maskEndY, i) {
+    if (i % 2 == 0) {
+        ctx.globalAlpha = 0.6;
+    } else {
+        ctx.globalAlpha = 0.8;
+    }
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, startY, canvasWidth, maskEndY - startY);
+    ctx.globalAlpha = 1;
 }
 
 const factionLineColor = {
     "wei": "rgb(24, 97, 153)", "shu": "rgb(162, 49, 27)", "wu": "rgb(42, 125, 42)", "qun": "rgb(130, 118, 93)"
 }
-function drawSkillName(ctx, skill, faction) {
+
+function drawSkillName(ctx, skill, faction, startY, edgeWidth) {
     let backgroundColor = "black";
     let lineColor = "white";
     let fontColor = "white";
@@ -130,7 +197,7 @@ function drawSkillName(ctx, skill, faction) {
 
     //技能底框
     //起始坐标
-    let start = { "x": 57, "y": 1014 };
+    let start = { "x": 57, "y": startY + edgeWidth };
 
     //技能标签属性
     let width = 110;
@@ -186,12 +253,130 @@ function drawSkillName(ctx, skill, faction) {
 
     //文字绘制
     //起始坐标
-    x = 111;
-    y = 1045;
+    let x = 111;
+    let y = startY + edgeWidth + 31;
     ctx.font = "37px SIMLI";
     ctx.fillStyle = fontColor;
     ctx.textAlign = "center";
     ctx.fillText(skill.name, x, y);
+}
+
+function drawSkillTrigger(ctx, skill, startY, edgeWidth) {
+    let backgroundColor = { "触发": "rgb(55, 100, 200)", "主动": "rgb(175, 0, 0)", "持续": "rgb(41, 129, 74)" }
+    let nums = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"]
+
+    //计算文字宽度
+    ctx.font = "37px HanYiZhongYuan";
+    let text = skill.trigger;
+    if (skill.count > 0) {
+        text += nums[skill.count - 1];
+    }
+    let textWidth = ctx.measureText(text).width;
+
+    //绘制矩形
+    let x = 211;
+    let y = startY + edgeWidth - 2;
+    let width = textWidth + 46;
+    let height = 41;
+
+    ctx.fillStyle = backgroundColor[skill.trigger];
+    ctx.fillRect(x, y, width, height);
+
+    //绘制半圆
+    ctx.beginPath();
+    ctx.arc(x + 6, y + height / 2, 18, Math.PI / 2, Math.PI * 1.5);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(x + width - 6, y + height / 2, 18, Math.PI * 1.5, Math.PI / 2);
+    ctx.closePath();
+    ctx.fill();
+
+    //文字绘制
+    //起始坐标
+    let textX = 193;
+    let textY = startY + edgeWidth + 31;
+
+    ctx.fillStyle = "white";
+    ctx.textAlign = "left";
+
+    ctx.font = "37px Arial";
+    ctx.fillText("【", textX, textY);
+
+    ctx.font = "37px HanYiZhongYuan";
+    ctx.fillText(text, textX + 41, textY);
+
+    ctx.font = "37px Arial";
+    ctx.fillText("】", textX + 45 + textWidth, textY);
+}
+
+function drawSkillDetail(ctx, skill, startY, edgeWidth) {
+    let sideEdgeWidth = 57;
+
+    ctx.font = "37px HanYiZhongYuan";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "left";
+
+    let beginX = 351;
+    let beginY = startY + edgeWidth + 29;
+    if (skill.count > 0) {
+        beginX += 37;//发动次数像素偏移
+    }
+    let text;
+    for (let i = 0; i < skill.description.length; i++) {
+        text = skill.description[i];
+        let position = getTextBounds(ctx, text, beginX, beginY);
+        //超宽换行
+        if (position.x + position.width > canvasWidth - sideEdgeWidth) {
+            beginX = sideEdgeWidth;
+            beginY = position.y + position.height + 50;//行高13+字体37像素
+        }
+        position = getTextBounds(ctx, text, beginX, beginY);
+        ctx.fillText(skill.description[i], beginX, beginY);
+        beginX = position.x + position.width;
+    }
+    return beginY;
+}
+
+function getSkillAreaHeight(ctx, skill) {
+    let sideEdgeWidth = 57;
+
+    ctx.font = "37px HanYiZhongYuan";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "left";
+
+    let beginX = 351;
+    let beginY = 0;
+    if (skill.count > 0) {
+        beginX += 37;//发动次数像素偏移
+    }
+    let text;
+    for (let i = 0; i < skill.description.length; i++) {
+        text = skill.description[i];
+        let position = getTextBounds(ctx, text, beginX, beginY);
+        //超宽换行
+        if (position.x + position.width > canvasWidth - sideEdgeWidth) {
+            beginX = sideEdgeWidth;
+            beginY = position.y + position.height + 50;//行高13+字体37像素
+        }
+        position = getTextBounds(ctx, text, beginX, beginY);
+        beginX = position.x + position.width;
+    }
+    return beginY + 37;
+}
+
+function getTextBounds(ctx, text, x, y) {
+    var metrics = ctx.measureText(text);
+    var width = metrics.width;
+    var height = parseInt(ctx.font, 10);
+
+    return {
+        x: x,
+        y: y - height,
+        width: width,
+        height: height
+    };
 }
 
 function drawCardQibing(ctx, qiBings) {
@@ -311,8 +496,14 @@ function updateSkillList() {
                     <input type="text" id="skill-name-${index}" value="${skill.name}" oninput="updateSkill(${index}, 'name', this.value)">
                     <br>
                     <label for="skill-description-${index}">技能描述:</label>
-                    <input type="text" id="skill-description-${index}" value="${skill.description}" oninput="updateSkill(${index}, 'description', this.value)">
                     <br>
+                    <textarea rows="3" id="skill-description-${index}" value="${skill.description}" oninput="updateSkill(${index}, 'description', this.value)">${skill.description}</textarea>
+                    <br>
+                    <div id="preset-buttons">
+                        <button type="button" id="btn1">按钮1</button>
+                        <button type="button" id="btn2">按钮2</button>
+                        <button type="button" id="btn3">按钮3</button>
+                    </div>
                     <button type="button" onclick="removeSkill(${index})">删除技能</button>
                 </fieldset>
             </div>

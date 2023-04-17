@@ -18,6 +18,11 @@
     src: url('./fonts/汉仪天马行楷.ttf') format('truetype');
 }
 
+@font-face {
+    font-family: 'HanYiZhongYuan';
+    src: url('./fonts/汉仪中圆简.ttf') format('truetype');
+}
+
 html,
 body {
     font-family: Arial, sans-serif;
@@ -114,7 +119,8 @@ input[type="number"] {
     width: 70px;
 }
 
-input[type="text"] {
+input[type="text"],
+textarea {
     width: 95%;
 }
 
