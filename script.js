@@ -33,6 +33,8 @@ function drawCard() {
 
     ctx.fillStyle = 'blue';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, canvasHeight - 96, canvasWidth, 96);
 
     const faction = document.querySelector('input[name="faction"]:checked').value;
     const health = document.getElementById('health').value;
@@ -113,7 +115,7 @@ function drawCardScore(ctx, score) {
 
 function drawCardSkills(ctx, skills, faction) {
     const maxWidth = 57;//最大边缘宽度
-    const minWidth = 19;//最小边缘宽度
+    const minWidth = 15;//最小边缘宽度
 
     const maxMaskY = 957;//遮罩最低高度
     const bottomMaskY = canvasHeight - 96;//遮罩区最低处Y坐标
@@ -125,9 +127,8 @@ function drawCardSkills(ctx, skills, faction) {
             textAreaHeight += getSkillAreaHeight(ctx, skill);
             textAreaHeight += 2 * minWidth;//多个技能时增加两倍最小间距
         });
-        textAreaHeight - 2 * minWidth;
+        textAreaHeight -= 2 * minWidth;
     }
-    console.log("textAreaHeight:",textAreaHeight)
 
     //顶部边缘宽度
     let topEdge;
@@ -145,7 +146,7 @@ function drawCardSkills(ctx, skills, faction) {
     } else {
         //技能区域大于未扩展最大宽度：向上扩展起始Y坐标
         startY = maxMaskY - (textAreaHeight - (bottomMaskY - maxMaskY - 2 * minWidth));
-        topEdge = minWidth;
+        topEdge = (bottomMaskY - startY - textAreaHeight) / 2;
     }
 
     for (let i = 0; i < skills.length; i++) {
@@ -163,7 +164,7 @@ function drawCardSkills(ctx, skills, faction) {
         drawCardSkillMask(ctx, startY, maskEndY, i);
         drawSkillName(ctx, skill, faction, startY, topEdge);
         drawSkillTrigger(ctx, skill, startY, topEdge);
-        drawSkillDetail(ctx, skill, startY, topEdge);
+        drawSkillDetail(ctx, skill, startY, topEdge, true);
         startY = maskEndY;
         topEdge = minWidth;
     }
@@ -184,7 +185,7 @@ const factionLineColor = {
     "wei": "rgb(24, 97, 153)", "shu": "rgb(162, 49, 27)", "wu": "rgb(42, 125, 42)", "qun": "rgb(130, 118, 93)"
 }
 
-function drawSkillName(ctx, skill, faction, startY, edgeWidth) {
+function drawSkillName(ctx, skill, faction, startY, topEdge) {
     let backgroundColor = "black";
     let lineColor = "white";
     let fontColor = "white";
@@ -197,7 +198,7 @@ function drawSkillName(ctx, skill, faction, startY, edgeWidth) {
 
     //技能底框
     //起始坐标
-    let start = { "x": 57, "y": startY + edgeWidth };
+    let start = { "x": 57, "y": startY + topEdge };
 
     //技能标签属性
     let width = 110;
@@ -254,14 +255,14 @@ function drawSkillName(ctx, skill, faction, startY, edgeWidth) {
     //文字绘制
     //起始坐标
     let x = 111;
-    let y = startY + edgeWidth + 31;
+    let y = startY + topEdge + 31;
     ctx.font = "37px SIMLI";
     ctx.fillStyle = fontColor;
     ctx.textAlign = "center";
     ctx.fillText(skill.name, x, y);
 }
 
-function drawSkillTrigger(ctx, skill, startY, edgeWidth) {
+function drawSkillTrigger(ctx, skill, startY, topEdge) {
     let backgroundColor = { "触发": "rgb(55, 100, 200)", "主动": "rgb(175, 0, 0)", "持续": "rgb(41, 129, 74)" }
     let nums = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"]
 
@@ -275,7 +276,7 @@ function drawSkillTrigger(ctx, skill, startY, edgeWidth) {
 
     //绘制矩形
     let x = 211;
-    let y = startY + edgeWidth - 2;
+    let y = startY + topEdge - 2;
     let width = textWidth + 46;
     let height = 41;
 
@@ -296,7 +297,7 @@ function drawSkillTrigger(ctx, skill, startY, edgeWidth) {
     //文字绘制
     //起始坐标
     let textX = 193;
-    let textY = startY + edgeWidth + 31;
+    let textY = startY + topEdge + 31;
 
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
@@ -311,65 +312,69 @@ function drawSkillTrigger(ctx, skill, startY, edgeWidth) {
     ctx.fillText("】", textX + 45 + textWidth, textY);
 }
 
-function drawSkillDetail(ctx, skill, startY, edgeWidth) {
-    let sideEdgeWidth = 57;
-
-    ctx.font = "37px HanYiZhongYuan";
-    ctx.fillStyle = "black";
+function drawSkillDetail(ctx, skill, startY, topEdge, fillText) {
     ctx.textAlign = "left";
-
+    let sideEdgeWidth = 57;
     let beginX = 351;
-    let beginY = startY + edgeWidth + 29;
+    let beginY = startY + topEdge + 29;
     if (skill.count > 0) {
         beginX += 37;//发动次数像素偏移
     }
-    let text;
-    for (let i = 0; i < skill.description.length; i++) {
-        text = skill.description[i];
-        let position = getTextBounds(ctx, text, beginX, beginY);
-        //超宽换行
-        if (position.x + position.width > canvasWidth - sideEdgeWidth) {
-            beginX = sideEdgeWidth;
-            beginY = position.y + position.height + 50;//行高13+字体37像素
+    let lineNum = 1;
+    for (let i = 0; i < skill.description.length;) {
+        //重置文字样式
+        ctx.font = "37px HanYiZhongYuan";
+        ctx.fillStyle = "black";
+
+        let char = skill.description[i];
+        let text = char;
+        if (char == "{") {
+            for (let j = i + 1; j < skill.description.length; j++) {
+                text += skill.description[j];
+                if (skill.description[j] == "}")
+                    break;
+            }
         }
-        position = getTextBounds(ctx, text, beginX, beginY);
-        ctx.fillText(skill.description[i], beginX, beginY);
-        beginX = position.x + position.width;
+        i += text.length;
+
+        if (text == "{黑色}") {
+            ctx.font = "bold 37px HanYiZhongYuan";
+            ctx.fillStyle = "black";
+            text = "黑色"
+        } else if (text == "{红色}") {
+            ctx.font = "bold 37px HanYiZhongYuan";
+            ctx.fillStyle = "rgb(240, 0, 0)";
+            text = "红色"
+        }
+        //TODO 判定结果绘图
+
+        for (let j = 0; j < text.length; j++) {
+            let position = getTextBounds(ctx, text[j], beginX, beginY);
+            //超宽换行
+            if (position.x + position.width > canvasWidth - sideEdgeWidth) {
+                beginX = sideEdgeWidth;
+                beginY = position.y + position.height + 50;//行高13+字体37像素
+                lineNum++;
+            }
+            position = getTextBounds(ctx, text[j], beginX, beginY);
+            if (fillText) {
+                ctx.fillText(text[j], beginX, beginY);
+            }
+            beginX = position.x + position.width;
+        }
     }
-    return beginY;
+    return lineNum;
 }
 
 function getSkillAreaHeight(ctx, skill) {
-    let sideEdgeWidth = 57;
-
-    ctx.font = "37px HanYiZhongYuan";
-    ctx.fillStyle = "black";
-    ctx.textAlign = "left";
-
-    let beginX = 351;
-    let beginY = 0;
-    if (skill.count > 0) {
-        beginX += 37;//发动次数像素偏移
-    }
-    let text;
-    for (let i = 0; i < skill.description.length; i++) {
-        text = skill.description[i];
-        let position = getTextBounds(ctx, text, beginX, beginY);
-        //超宽换行
-        if (position.x + position.width > canvasWidth - sideEdgeWidth) {
-            beginX = sideEdgeWidth;
-            beginY = position.y + position.height + 50;//行高13+字体37像素
-        }
-        position = getTextBounds(ctx, text, beginX, beginY);
-        beginX = position.x + position.width;
-    }
-    return beginY + 37;
+    let lineNum = drawSkillDetail(ctx, skill, 0, 0, false);
+    return lineNum * 37 + (lineNum - 1) * 13;//行高
 }
 
 function getTextBounds(ctx, text, x, y) {
     var metrics = ctx.measureText(text);
     var width = metrics.width;
-    var height = parseInt(ctx.font, 10);
+    var height = 37;
 
     return {
         x: x,
@@ -471,9 +476,32 @@ function updateSkill(index, key, value) {
 }
 
 function removeSkill(index) {
-    skills.splice(index, 1);
-    updateSkillList();
+    // 显示自定义确认对话框
+    const confirmDialog = document.getElementById('confirm-dialog');
+    confirmDialog.classList.remove('hidden');
+
+    // 获取确定按钮和取消按钮
+    const confirmYesButton = document.getElementById('confirm-yes');
+    const confirmNoButton = document.getElementById('confirm-no');
+
+    // 移除旧的事件监听器
+    confirmYesButton.onclick = null;
+    confirmNoButton.onclick = null;
+
+    // 为确定按钮添加新的事件监听器
+    confirmYesButton.onclick = function () {
+        console.log("remove:", index);
+        skills.splice(index, 1);
+        updateSkillList();
+        confirmDialog.classList.add('hidden');
+    };
+
+    // 为取消按钮添加新的事件监听器
+    confirmNoButton.onclick = function () {
+        confirmDialog.classList.add('hidden');
+    };
 }
+
 
 function updateSkillList() {
     skillList.innerHTML = skills.map((skill, index) => {
@@ -481,6 +509,9 @@ function updateSkillList() {
             <div>
                 <fieldset>
                     <legend>技能 ${index + 1}</legend>
+                    <label for="skill-name-${index}">技能名称:</label>
+                    <input type="text" id="skill-name-${index}" value="${skill.name}" oninput="updateSkill(${index}, 'name', this.value)">
+                    <br>
                     <label class="radio-label"><input type="radio" name="skill-type-${index}" value="normal" checked oninput="updateSkill(${index}, 'type', this.value)"> 普通技能</label>
                     <label class="radio-label"><input type="radio" name="skill-type-${index}" value="ambush" oninput="updateSkill(${index}, 'type', this.value)"> 伏击技能</label>
                     <br>
@@ -492,17 +523,17 @@ function updateSkillList() {
                     <label><input type="checkbox" id="skill-count-toggle-${index}" oninput="toggleSkillCount(${index})" ${skill.countEnabled ? 'checked' : ''}> </label>
                     <input type="number" id="skill-count-${index}" value="${skill.count}" oninput="updateSkill(${index}, 'count', this.value)" ${skill.countEnabled ? '' : 'disabled'}>
                     <br>
-                    <label for="skill-name-${index}">技能名称:</label>
-                    <input type="text" id="skill-name-${index}" value="${skill.name}" oninput="updateSkill(${index}, 'name', this.value)">
-                    <br>
                     <label for="skill-description-${index}">技能描述:</label>
                     <br>
                     <textarea rows="3" id="skill-description-${index}" value="${skill.description}" oninput="updateSkill(${index}, 'description', this.value)">${skill.description}</textarea>
                     <br>
                     <div id="preset-buttons">
-                        <button type="button" id="btn1">按钮1</button>
-                        <button type="button" id="btn2">按钮2</button>
-                        <button type="button" id="btn3">按钮3</button>
+                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{黑色}')">黑色</button>
+                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{红色}')">红色</button>
+                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{青龙}')">黑桃/青龙</button>
+                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{白虎}')">草花/白虎</button>
+                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{朱雀}')">红桃/朱雀</button>
+                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{玄武}')">方块/玄武</button>
                     </div>
                     <button type="button" onclick="removeSkill(${index})">删除技能</button>
                 </fieldset>
@@ -540,6 +571,12 @@ function uploadImage(event) {
         };
         reader.readAsDataURL(input.files[0]);
     }
+}
+
+function appendTextToSkillDescription(index, text) {
+    const skillDescription = document.getElementById(`skill-description-${index}`);
+    skillDescription.value += text;
+    updateSkill(index, 'description', skillDescription.value);
 }
 
 window.onload = function () {
