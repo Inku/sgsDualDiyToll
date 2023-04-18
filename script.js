@@ -11,8 +11,6 @@ WebFont.load({
 });
 
 const canvas = document.getElementById('card-canvas');
-const canvasWidth = parseInt(canvas.getAttribute("width"), 10);
-const canvasHeight = parseInt(canvas.getAttribute("height"), 10);
 
 const inputs = document.querySelectorAll('input, select');
 inputs.forEach(input => {
@@ -26,30 +24,93 @@ function resetShadow(ctx) {
     ctx.shadowBlur = 0; // 清除阴影的模糊程度    
 }
 
+let img = new Image();
+const cardSize = {
+    "maxEdge": 55,
+    "fontSize": 37
+}
+
 function drawCard() {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const card = document.getElementById('card');
 
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, canvasHeight - 96, canvasWidth, 96);
-
     const faction = document.querySelector('input[name="faction"]:checked').value;
     const health = document.getElementById('health').value;
 
+    drawCardImg(ctx);
+    drawCardTopBorder(ctx, faction);
+    drawCardHealth(ctx, health, faction);
     drawCardName(ctx, document.getElementById('name').value);
     drawCardTitle(ctx, document.getElementById('title').value);
     drawCardScore(ctx, document.getElementById('score').value);
     drawCardSkills(ctx, skills, faction);
-    drawCardQibing(ctx, qiBings);
+    drawCardBottomBorder(ctx, faction);
+    drawCardQibing(ctx, qiBings, faction);
+}
+
+function uploadImage(event) {
+    // 获取上传的图片文件
+    const file = event.target.files[0];
+    // 创建 FileReader 对象以读取图片
+    const reader = new FileReader();
+    // 当读取操作成功完成时触发
+    reader.onload = function (e) {
+        const loadingElement = document.getElementById('loading');
+        // 显示 loading 元素
+        loadingElement.style.display = 'block';
+        // 当图像加载完成时触发
+        img.onload = function () {
+            // 隐藏 loading 元素
+            loadingElement.style.display = 'none';
+            // 调用 drawCard() 函数绘制图片
+            drawCard();
+        };
+        // 设置图像源
+        img.src = e.target.result;
+    };
+    // 读取文件并将其转换为 DataURL
+    reader.readAsDataURL(file);
+}
+
+function drawCardTopBorder(ctx, faction) {
+    const img = loadedImages[`${faction}-top`];
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+}
+
+function drawCardBottomBorder(ctx, faction) {
+    const img = loadedImages[`${faction}-bottom`];
+    ctx.drawImage(img, 0, canvas.height - img.height, img.width, img.height);
+}
+
+function drawCardHealth(ctx, health, faction) {
+    const img = loadedImages[`${faction}-jade`];
+    const startX = 214;
+    const xOffset = 50;
+    const y = 28;
+    for (let i = 0; i < health; i++) {
+        ctx.drawImage(img, startX + i * xOffset, y, 55, 60);
+    }
+}
+
+function drawCardImg(ctx) {
+    // 绘制图像
+    if (img.complete) { // 如果图片已加载完成，绘制图片
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
 }
 
 function drawCardName(ctx, name) {
     let x = 131;
-    let yStart = 397;
-    let yOffset = 108;
+    let yStart;
+    let yOffset;
+    if (name.length == 2) {
+        yStart = 397;
+        yOffset = 108;
+    } else {
+        yStart = 343;
+        yOffset = 108;
+    }
     ctx.font = "91px JinMeiMaoCao";
 
     //绘制阴影
@@ -101,8 +162,8 @@ function drawCardTitle(ctx, title) {
 }
 
 function drawCardScore(ctx, score) {
-    const x = 120;
-    const y = 195;
+    const x = 123;
+    const y = 197;
     ctx.font = "160px HanYiTianMaXing";
 
     ctx.lineWidth = 4;
@@ -114,11 +175,11 @@ function drawCardScore(ctx, score) {
 }
 
 function drawCardSkills(ctx, skills, faction) {
-    const maxWidth = 57;//最大边缘宽度
+    const maxWidth = cardSize["maxEdge"];//最大边缘宽度
     const minWidth = 15;//最小边缘宽度
 
     const maxMaskY = 957;//遮罩最低高度
-    const bottomMaskY = canvasHeight - 96;//遮罩区最低处Y坐标
+    const bottomMaskY = canvas.height - 96;//遮罩区最低处Y坐标
 
     //计算技能文字区域总体高度
     let textAreaHeight = 0;
@@ -157,7 +218,7 @@ function drawCardSkills(ctx, skills, faction) {
         let maskEndY;
         if (i == skills.length - 1) {
             //最后一个遮罩区覆盖剩余部分   
-            maskEndY = canvasHeight;
+            maskEndY = canvas.height;
         } else {
             maskEndY = startY + topEdge + skillHeight + minWidth;
         }
@@ -166,7 +227,7 @@ function drawCardSkills(ctx, skills, faction) {
         skill.effects.forEach(effect => {
             drawEffectTrigger(ctx, effect, startY, topEdge);
             let line = drawEffectText(ctx, effect, startY, topEdge, true);
-            startY += line * 37 + (line - 1) * 13;
+            startY += line * cardSize["fontSize"] + (line - 1) * 13;
             topEdge += 13;
         })
         startY = maskEndY;
@@ -181,7 +242,7 @@ function drawCardSkillMask(ctx, startY, maskEndY, i) {
         ctx.globalAlpha = 0.8;
     }
     ctx.fillStyle = 'white';
-    ctx.fillRect(0, startY, canvasWidth, maskEndY - startY);
+    ctx.fillRect(0, startY, canvas.width, maskEndY - startY);
     ctx.globalAlpha = 1;
 }
 
@@ -202,7 +263,7 @@ function drawSkillName(ctx, skill, faction, startY, topEdge) {
 
     //技能底框
     //起始坐标
-    let start = { "x": 57, "y": startY + topEdge };
+    let start = { "x": cardSize["maxEdge"], "y": startY + topEdge };
 
     //技能标签属性
     let width = 110;
@@ -260,7 +321,7 @@ function drawSkillName(ctx, skill, faction, startY, topEdge) {
     //起始坐标
     let x = 111;
     let y = startY + topEdge + 31;
-    ctx.font = "37px SIMLI";
+    ctx.font = cardSize["fontSize"] + "px SIMLI";
     ctx.fillStyle = fontColor;
     ctx.textAlign = "center";
     ctx.fillText(skill.name, x, y);
@@ -271,7 +332,7 @@ function drawEffectTrigger(ctx, effect, startY, topEdge) {
     let nums = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"]
 
     //计算文字宽度
-    ctx.font = "37px HanYiZhongYuan";
+    ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
     let text = effect.trigger;
     if (effect.count > 0) {
         text += nums[effect.count - 1];
@@ -306,31 +367,31 @@ function drawEffectTrigger(ctx, effect, startY, topEdge) {
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
 
-    ctx.font = "37px Arial";
+    ctx.font = cardSize["fontSize"] + "px Arial";
     ctx.fillText("【", textX, textY);
 
-    ctx.font = "37px HanYiZhongYuan";
-    ctx.fillText(text, textX + 41, textY);
+    ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
+    ctx.fillText(text, textX + cardSize["fontSize"] + 4, textY);
 
-    ctx.font = "37px Arial";
-    ctx.fillText("】", textX + 45 + textWidth, textY);
+    ctx.font = cardSize["fontSize"] + "px Arial";
+    ctx.fillText("】", textX + cardSize["fontSize"] + 8 + textWidth, textY);
 }
 
 function drawEffectText(ctx, effect, startY, topEdge, fillText) {
     ctx.textAlign = "left";
-    const sideEdgeWidth = 57;
-    const x = 351;
-    const y = startY + topEdge + 29;
+    const sideEdgeWidth = cardSize["maxEdge"];
+    const x = 357;
+    const y = startY + topEdge + 31;
     let beginX = x;
     let beginY = y;
 
     if (effect.count > 0) {
-        beginX += 37;//发动次数像素偏移
+        beginX += cardSize["fontSize"];//发动次数像素偏移
     }
     let lineNum = 1;
     for (let i = 0; i < effect.description.length;) {
         //重置文字样式
-        ctx.font = "37px HanYiZhongYuan";
+        ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
         ctx.fillStyle = "black";
 
         let char = effect.description[i];
@@ -345,11 +406,11 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
         i += text.length;
 
         if (text == "{黑色}") {
-            ctx.font = "bold 37px HanYiZhongYuan";
+            ctx.font = "bold " + cardSize["fontSize"] + "px HanYiZhongYuan";
             ctx.fillStyle = "black";
             text = "黑色"
         } else if (text == "{红色}") {
-            ctx.font = "bold 37px HanYiZhongYuan";
+            ctx.font = "bold " + cardSize["fontSize"] + "px HanYiZhongYuan";
             ctx.fillStyle = "rgb(240, 0, 0)";
             text = "红色"
         }
@@ -358,9 +419,9 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
         for (let j = 0; j < text.length; j++) {
             let position = getTextBounds(ctx, text[j], beginX, beginY);
             //超宽换行
-            if (position.x + position.width > canvasWidth - sideEdgeWidth) {
+            if (position.x + position.width > canvas.width - sideEdgeWidth) {
                 beginX = sideEdgeWidth;
-                beginY = position.y + position.height + 50;//行高13+字体37像素
+                beginY = position.y + position.height + 13 + cardSize["fontSize"];//行高13+字体37像素
                 lineNum++;
             }
             position = getTextBounds(ctx, text[j], beginX, beginY);
@@ -378,13 +439,13 @@ function getSkillAreaHeight(ctx, skill) {
     skill.effects.forEach(effect => {
         line += drawEffectText(ctx, effect, 0, 0, false);
     })
-    return line * 37 + (line - 1) * 13;//行高
+    return line * cardSize["fontSize"] + (line - 1) * 13;//行高
 }
 
 function getTextBounds(ctx, text, x, y) {
     var metrics = ctx.measureText(text);
     var width = metrics.width;
-    var height = 37;
+    var height = cardSize["fontSize"];
 
     return {
         x: x,
@@ -394,18 +455,22 @@ function getTextBounds(ctx, text, x, y) {
     };
 }
 
-function drawCardQibing(ctx, qiBings) {
-    ctx.font = "112px SIMLI";
+function drawCardQibing(ctx, qiBings, faction) {
+    ctx.font = "109px SIMLI";
 
     let xStart = 834;
-    let xOffset = 130;
-    let y = 139;
+    let xOffset = 135;
+    let y = 137;
 
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 4;
     ctx.strokeStyle = "black";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
+
+
     for (let i = 0; i < qiBings.length; i++) {
+        const img = loadedImages[`${faction}-qb-bg`];
+        ctx.drawImage(img, xStart - i * xOffset - 75, y - 107, 149, 149);
         ctx.strokeText(qiBings[i], xStart - i * xOffset, y);
         ctx.fillText(qiBings[i], xStart - i * xOffset, y);
     }
@@ -629,28 +694,67 @@ function toggleEffectCount(skillIndex, effectIndex) {
     }
 }
 
-function uploadImage(event) {
-    const input = event.target;
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const card = document.getElementById('card');
-            if (card) {
-                card.style.backgroundImage = `url(${e.target.result})`;
-            } else {
-                console.error('Card element not found.');
-            }
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
 function appendTextToEffectDescription(skillIndex, effectIndex, text) {
     const effectDescriptionInput = document.getElementById(`effect-description-${skillIndex}-${effectIndex}`);
     effectDescriptionInput.value += text;
     updateEffect(skillIndex, effectIndex, "description", effectDescriptionInput.value);
 }
 
+function loadImage(filename) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.src = filename;
+        img.onload = () => {
+            resolve(img);
+        };
+    });
+}
+
+function loadImages(imageFilenames) {
+    const promises = [];
+
+    for (const key in imageFilenames) {
+        const url = './resources/' + imageFilenames[key];
+        promises.push(loadImage(url).then((img) => ({ key, img })));
+    }
+
+    return Promise.all(promises);
+}
+
+
+const imageFilenames = {
+    "shu-top": "shu-top.png",
+    "shu-bottom": "shu-bottom.png",
+    "shu-qb-bg": "shu-qb-bg.png",
+    "shu-jade": "shu-jade.png",
+    "wu-top": "wu-top.png",
+    "wu-bottom": "wu-bottom.png",
+    "wu-qb-bg": "wu-qb-bg.png",
+    "wu-jade": "wu-jade.png",
+    "wei-top": "wei-top.png",
+    "wei-bottom": "wei-bottom.png",
+    "wei-qb-bg": "wei-qb-bg.png",
+    "wei-jade": "wei-jade.png",
+    "qun-top": "qun-top.png",
+    "qun-bottom": "qun-bottom.png",
+    "qun-qb-bg": "qun-qb-bg.png",
+    "qun-jade": "qun-jade.png"
+};
+const loadedImages = {};
 window.onload = function () {
-    drawCard();
+    loadImages(imageFilenames)
+        .then((imageList) => {
+
+            imageList.forEach(({ key, img }) => {
+                loadedImages[key] = img;
+            });
+
+            // 在这里使用 loadedImages 对象
+            console.log("loadedImages加载完成");
+            console.log(loadedImages);
+            drawCard();
+        })
+        .catch((error) => {
+            console.error('Error loading images:', error);
+        });
 };
