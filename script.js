@@ -3,9 +3,11 @@ WebFont.load({
         families: ['HanYiTianMaXing', 'simhei', 'SIMLI', 'JinMeiMaoCao', 'HuaKangXinZhuan', 'HanYiZhongYuan']
     },
     fontactive: function (familyName, fvd) {
+        document.getElementById('loading').classList.remove('hidden');
         console.log('Font "' + familyName + '" has loaded.');
     },
     active: function () {
+        document.getElementById('loading').classList.add('hidden');
         console.log('All fonts have loaded.');
     }
 });
@@ -56,13 +58,12 @@ function uploadImage(event) {
     const reader = new FileReader();
     // 当读取操作成功完成时触发
     reader.onload = function (e) {
-        const loadingElement = document.getElementById('loading');
         // 显示 loading 元素
-        loadingElement.style.display = 'block';
+        document.getElementById('loading').classList.remove('hidden');
         // 当图像加载完成时触发
         img.onload = function () {
             // 隐藏 loading 元素
-            loadingElement.style.display = 'none';
+            document.getElementById('loading').classList.add('hidden');
             // 调用 drawCard() 函数绘制图片
             drawCard();
         };
@@ -783,14 +784,9 @@ const loadedImages = {};
 window.onload = function () {
     loadImages(imageFilenames)
         .then((imageList) => {
-
             imageList.forEach(({ key, img }) => {
                 loadedImages[key] = img;
             });
-
-            // 在这里使用 loadedImages 对象
-            console.log("loadedImages加载完成");
-            console.log(loadedImages);
             drawCard();
         })
         .catch((error) => {
