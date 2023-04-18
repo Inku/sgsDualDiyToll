@@ -757,6 +757,19 @@ function loadImages(imageFilenames) {
     return Promise.all(promises);
 }
 
+document.getElementById('save-image').addEventListener('click', function () {
+    const image = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+
+    link.href = image;
+    let name = document.getElementById('name').value;
+    if (!name) {
+        name = 'card';
+    }
+    link.download = 'card.png';
+    link.click();
+});
+
 
 const imageFilenames = {
     "shu-top": "shu-top.png",
@@ -788,6 +801,7 @@ window.onload = function () {
                 loadedImages[key] = img;
             });
             drawCard();
+            document.getElementById('loading').classList.add('hidden');
         })
         .catch((error) => {
             console.error('Error loading images:', error);
