@@ -163,8 +163,12 @@ function drawCardSkills(ctx, skills, faction) {
         }
         drawCardSkillMask(ctx, startY, maskEndY, i);
         drawSkillName(ctx, skill, faction, startY, topEdge);
-        drawSkillTrigger(ctx, skill, startY, topEdge);
-        drawSkillDetail(ctx, skill, startY, topEdge, true);
+        skill.effects.forEach(effect => {
+            drawEffectTrigger(ctx, effect, startY, topEdge);
+            let line = drawEffectText(ctx, effect, startY, topEdge, true);
+            startY += line * 37 + (line - 1) * 13;
+            topEdge += 13;
+        })
         startY = maskEndY;
         topEdge = minWidth;
     }
@@ -262,15 +266,15 @@ function drawSkillName(ctx, skill, faction, startY, topEdge) {
     ctx.fillText(skill.name, x, y);
 }
 
-function drawSkillTrigger(ctx, skill, startY, topEdge) {
+function drawEffectTrigger(ctx, effect, startY, topEdge) {
     let backgroundColor = { "触发": "rgb(55, 100, 200)", "主动": "rgb(175, 0, 0)", "持续": "rgb(41, 129, 74)" }
     let nums = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"]
 
     //计算文字宽度
     ctx.font = "37px HanYiZhongYuan";
-    let text = skill.trigger;
-    if (skill.count > 0) {
-        text += nums[skill.count - 1];
+    let text = effect.trigger;
+    if (effect.count > 0) {
+        text += nums[effect.count - 1];
     }
     let textWidth = ctx.measureText(text).width;
 
@@ -280,7 +284,7 @@ function drawSkillTrigger(ctx, skill, startY, topEdge) {
     let width = textWidth + 46;
     let height = 41;
 
-    ctx.fillStyle = backgroundColor[skill.trigger];
+    ctx.fillStyle = backgroundColor[effect.trigger];
     ctx.fillRect(x, y, width, height);
 
     //绘制半圆
@@ -312,26 +316,29 @@ function drawSkillTrigger(ctx, skill, startY, topEdge) {
     ctx.fillText("】", textX + 45 + textWidth, textY);
 }
 
-function drawSkillDetail(ctx, skill, startY, topEdge, fillText) {
+function drawEffectText(ctx, effect, startY, topEdge, fillText) {
     ctx.textAlign = "left";
-    let sideEdgeWidth = 57;
-    let beginX = 351;
-    let beginY = startY + topEdge + 29;
-    if (skill.count > 0) {
+    const sideEdgeWidth = 57;
+    const x = 351;
+    const y = startY + topEdge + 29;
+    let beginX = x;
+    let beginY = y;
+
+    if (effect.count > 0) {
         beginX += 37;//发动次数像素偏移
     }
     let lineNum = 1;
-    for (let i = 0; i < skill.description.length;) {
+    for (let i = 0; i < effect.description.length;) {
         //重置文字样式
         ctx.font = "37px HanYiZhongYuan";
         ctx.fillStyle = "black";
 
-        let char = skill.description[i];
+        let char = effect.description[i];
         let text = char;
         if (char == "{") {
-            for (let j = i + 1; j < skill.description.length; j++) {
-                text += skill.description[j];
-                if (skill.description[j] == "}")
+            for (let j = i + 1; j < effect.description.length; j++) {
+                text += effect.description[j];
+                if (effect.description[j] == "}")
                     break;
             }
         }
@@ -367,8 +374,11 @@ function drawSkillDetail(ctx, skill, startY, topEdge, fillText) {
 }
 
 function getSkillAreaHeight(ctx, skill) {
-    let lineNum = drawSkillDetail(ctx, skill, 0, 0, false);
-    return lineNum * 37 + (lineNum - 1) * 13;//行高
+    let line = 0;
+    skill.effects.forEach(effect => {
+        line += drawEffectText(ctx, effect, 0, 0, false);
+    })
+    return line * 37 + (line - 1) * 13;//行高
 }
 
 function getTextBounds(ctx, text, x, y) {
@@ -461,17 +471,27 @@ const addSkillButton = document.getElementById('add-skill');
 addSkillButton.addEventListener('click', () => {
     const newSkill = {
         type: 'normal',
-        trigger: '触发',
-        count: '',
+        effects: [
+            {
+                trigger: '触发',
+                count: '',
+                countEnabled: false,
+                description: '',
+            },
+        ],
         name: '',
-        description: '',
     };
     skills.push(newSkill);
     updateSkillList();
 });
 
-function updateSkill(index, key, value) {
-    skills[index][key] = value;
+function updateSkill(skillIndex, key, value) {
+    skills[skillIndex][key] = value;
+    drawCard();
+}
+
+function updateEffect(skillIndex, effectIndex, key, value) {
+    skills[skillIndex].effects[effectIndex][key] = value;
     drawCard();
 }
 
@@ -502,58 +522,110 @@ function removeSkill(index) {
     };
 }
 
-
 function updateSkillList() {
-    skillList.innerHTML = skills.map((skill, index) => {
+    skillList.innerHTML = skills.map((skill, skillIndex) => {
+        const effects = skill.effects
+            .map(
+                (effect, effectIndex) => `
+                    <fieldset>
+                        <legend>效果 ${effectIndex + 1}</legend>
+                        <label class="radio-label"><input type="radio" name="effect-trigger-${skillIndex}-${effectIndex}" value="触发" ${effect.trigger === '触发' ? 'checked' : ''} oninput="updateEffect(${skillIndex}, ${effectIndex}, 'trigger', this.value)"> 触发</label>
+                        <label class="radio-label"><input type="radio" name="effect-trigger-${skillIndex}-${effectIndex}" value="主动" ${effect.trigger === '主动' ? 'checked' : ''} oninput="updateEffect(${skillIndex}, ${effectIndex}, 'trigger', this.value)"> 主动</label>
+                        <label class="radio-label"><input type="radio" name="effect-trigger-${skillIndex}-${effectIndex}" value="持续" ${effect.trigger === '持续' ? 'checked' : ''} oninput="updateEffect(${skillIndex}, ${effectIndex}, 'trigger', this.value)"> 持续</label>
+                        <br>
+                        <label>发动次数:</label>
+                        <label><input type="checkbox" id="effect-count-toggle-${skillIndex}-${effectIndex}" oninput="toggleEffectCount(${skillIndex}, ${effectIndex})" ${effect.countEnabled ? 'checked' : ''}> </label>
+                        <input type="number" id="effect-count-${skillIndex}-${effectIndex}" value="${effect.count}" oninput="updateEffect(${skillIndex}, ${effectIndex}, 'count', this.value)" ${effect.countEnabled ? '' : 'disabled'}>
+                        <br>
+                        <label for="effect-description-${skillIndex}-${effectIndex}">效果描述:</label>
+                        <br>
+                        <textarea rows="3" id="effect-description-${skillIndex}-${effectIndex}" value="${effect.description}" oninput="updateEffect(${skillIndex}, ${effectIndex}, 'description', this.value)">${effect.description}</textarea>
+                        <div id="preset-buttons">
+                            <button type="button" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex}, '{黑色}')">黑色</button>
+                            <button type="button" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex}, '{红色}')">红色</button>
+                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{青龙}')">黑桃/青龙</button>
+                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{白虎}')">草花/白虎</button>
+                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{朱雀}')">红桃/朱雀</button>
+                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{玄武}')">方块/玄武</button>
+                        </div>
+                        <button type="button" class="delete-btn" onclick="removeEffect(${skillIndex}, ${effectIndex})">删除效果</button>
+                    </fieldset>
+                `,
+            )
+            .join('');
+
         return `
             <div>
                 <fieldset>
-                    <legend>技能 ${index + 1}</legend>
-                    <label for="skill-name-${index}">技能名称:</label>
-                    <input type="text" id="skill-name-${index}" value="${skill.name}" oninput="updateSkill(${index}, 'name', this.value)">
+                    <legend>技能 ${skillIndex + 1}</legend>
+                    <label class="radio-label"><input type="radio" name="skill-type-${skillIndex}" value="normal" ${skill.type === 'normal' ? 'checked' : ''} oninput="updateSkill(${skillIndex}, 'type', this.value)"> 普通技能</label>
+                    <label class="radio-label"><input type="radio" name="skill-type-${skillIndex}" value="ambush" ${skill.type === 'ambush' ? 'checked' : ''} oninput="updateSkill(${skillIndex}, 'type', this.value)"> 伏击技能</label>
                     <br>
-                    <label class="radio-label"><input type="radio" name="skill-type-${index}" value="normal" checked oninput="updateSkill(${index}, 'type', this.value)"> 普通技能</label>
-                    <label class="radio-label"><input type="radio" name="skill-type-${index}" value="ambush" oninput="updateSkill(${index}, 'type', this.value)"> 伏击技能</label>
+                    <label for="skill-name-${skillIndex}">技能名称:</label>
+                    <input type="text" id="skill-name-${skillIndex}" value="${skill.name}" oninput="updateSkill(${skillIndex}, 'name', this.value)">
                     <br>
-                    <label class="radio-label"><input type="radio" name="skill-trigger-${index}" value="触发" checked oninput="updateSkill(${index}, 'trigger', this.value)"> 触发</label>
-                    <label class="radio-label"><input type="radio" name="skill-trigger-${index}" value="主动" oninput="updateSkill(${index}, 'trigger', this.value)"> 主动</label>
-                    <label class="radio-label"><input type="radio" name="skill-trigger-${index}" value="持续" oninput="updateSkill(${index}, 'trigger', this.value)"> 持续</label>
+                    ${effects}
                     <br>
-                    <label>发动次数:</label>
-                    <label><input type="checkbox" id="skill-count-toggle-${index}" oninput="toggleSkillCount(${index})" ${skill.countEnabled ? 'checked' : ''}> </label>
-                    <input type="number" id="skill-count-${index}" value="${skill.count}" oninput="updateSkill(${index}, 'count', this.value)" ${skill.countEnabled ? '' : 'disabled'}>
-                    <br>
-                    <label for="skill-description-${index}">技能描述:</label>
-                    <br>
-                    <textarea rows="3" id="skill-description-${index}" value="${skill.description}" oninput="updateSkill(${index}, 'description', this.value)">${skill.description}</textarea>
-                    <br>
-                    <div id="preset-buttons">
-                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{黑色}')">黑色</button>
-                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{红色}')">红色</button>
-                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{青龙}')">黑桃/青龙</button>
-                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{白虎}')">草花/白虎</button>
-                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{朱雀}')">红桃/朱雀</button>
-                        <button type="button" id="btn1" onclick="appendTextToSkillDescription(${index},'{玄武}')">方块/玄武</button>
-                    </div>
-                    <button type="button" onclick="removeSkill(${index})">删除技能</button>
+                    <button type="button" onclick="addEffect(${skillIndex})">添加效果</button>
+                    <button type="button" class="delete-btn" onclick="removeSkill(${skillIndex})">删除技能</button>
                 </fieldset>
             </div>
-        `;
+            `;
     }).join('');
     drawCard();
 }
 
-function toggleSkillCount(index) {
-    const toggle = document.getElementById(`skill-count-toggle-${index}`);
-    const input = document.getElementById(`skill-count-${index}`);
+function addEffect(skillIndex) {
+    const newEffect = {
+        trigger: '触发',
+        countEnabled: false,
+        count: '',
+        description: '',
+    };
+    skills[skillIndex].effects.push(newEffect);
+    updateSkillList();
+}
+
+function removeEffect(skillIndex, effectIndex) {
+    // 显示自定义确认对话框
+    const confirmDialog = document.getElementById('confirm-dialog');
+    confirmDialog.classList.remove('hidden');
+
+    // 获取确定按钮和取消按钮
+    const confirmYesButton = document.getElementById('confirm-yes');
+    const confirmNoButton = document.getElementById('confirm-no');
+
+    // 移除旧的事件监听器
+    confirmYesButton.onclick = null;
+    confirmNoButton.onclick = null;
+
+    // 为确定按钮添加新的事件监听器
+    confirmYesButton.onclick = function () {
+        console.log("remove effect:", skillIndex, effectIndex);
+        skills[skillIndex].effects.splice(effectIndex, 1);
+        updateSkillList();
+        confirmDialog.classList.add('hidden');
+    };
+
+    // 为取消按钮添加新的事件监听器
+    confirmNoButton.onclick = function () {
+        confirmDialog.classList.add('hidden');
+    };
+}
+
+function toggleEffectCount(skillIndex, effectIndex) {
+    const toggle = document.getElementById(`effect-count-toggle-${skillIndex}-${effectIndex}`);
+    const input = document.getElementById(`effect-count-${skillIndex}-${effectIndex}`);
     if (toggle.checked) {
         input.removeAttribute('disabled');
         input.value = 1;
-        updateSkill(index, 'count', 1);
+        updateEffect(skillIndex, effectIndex, 'count', 1);
+        updateEffect(skillIndex, effectIndex, 'countEnabled', true);
     } else {
         input.setAttribute('disabled', true);
         input.value = '';
-        updateSkill(index, 'count', null);
+        updateEffect(skillIndex, effectIndex, 'count', null);
+        updateEffect(skillIndex, effectIndex, 'countEnabled', false);
     }
 }
 
@@ -573,10 +645,10 @@ function uploadImage(event) {
     }
 }
 
-function appendTextToSkillDescription(index, text) {
-    const skillDescription = document.getElementById(`skill-description-${index}`);
-    skillDescription.value += text;
-    updateSkill(index, 'description', skillDescription.value);
+function appendTextToEffectDescription(skillIndex, effectIndex, text) {
+    const effectDescriptionInput = document.getElementById(`effect-description-${skillIndex}-${effectIndex}`);
+    effectDescriptionInput.value += text;
+    updateEffect(skillIndex, effectIndex, "description", effectDescriptionInput.value);
 }
 
 window.onload = function () {
