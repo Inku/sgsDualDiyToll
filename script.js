@@ -381,7 +381,7 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
     ctx.textAlign = "left";
     const sideEdgeWidth = cardSize["maxEdge"];
     const x = 357;
-    const y = startY + topEdge + 31;
+    const y = startY + topEdge + 29;
     let beginX = x;
     let beginY = y;
 
@@ -405,6 +405,7 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
         }
         i += text.length;
 
+        let img = null;
         if (text == "{黑色}") {
             ctx.font = "bold " + cardSize["fontSize"] + "px HanYiZhongYuan";
             ctx.fillStyle = "black";
@@ -413,6 +414,26 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
             ctx.font = "bold " + cardSize["fontSize"] + "px HanYiZhongYuan";
             ctx.fillStyle = "rgb(240, 0, 0)";
             text = "红色"
+        } else if (text == "{青龙}") {
+            img = loadedImages["spade"];
+        } else if (text == "{白虎}") {
+            img = loadedImages["club"];
+        } else if (text == "{朱雀}") {
+            img = loadedImages["heart"];
+        } else if (text == "{玄武}") {
+            img = loadedImages["diamond"];
+        }
+        if (img) {
+            if (beginX + cardSize.fontSize > canvas.width - sideEdgeWidth) {
+                beginX = sideEdgeWidth;
+                beginY = beginY + 13 + cardSize["fontSize"];
+                lineNum++;
+            }
+            if (fillText) {
+                ctx.drawImage(img, beginX, beginY - cardSize["fontSize"] + 7, cardSize["fontSize"], cardSize["fontSize"]);
+            }
+            beginX += cardSize["fontSize"];
+            continue;
         }
         //TODO 判定结果绘图
 
@@ -421,7 +442,7 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
             //超宽换行
             if (position.x + position.width > canvas.width - sideEdgeWidth) {
                 beginX = sideEdgeWidth;
-                beginY = position.y + position.height + 13 + cardSize["fontSize"];//行高13+字体37像素
+                beginY = position.y + position.height + 13 + cardSize["fontSize"];
                 lineNum++;
             }
             position = getTextBounds(ctx, text[j], beginX, beginY);
@@ -738,7 +759,11 @@ const imageFilenames = {
     "qun-top": "qun-top.png",
     "qun-bottom": "qun-bottom.png",
     "qun-qb-bg": "qun-qb-bg.png",
-    "qun-jade": "qun-jade.png"
+    "qun-jade": "qun-jade.png",
+    "spade": "spade.png",
+    "heart": "heart.png",
+    "club": "club.png",
+    "diamond": "diamond.png"
 };
 const loadedImages = {};
 window.onload = function () {
