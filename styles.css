@@ -1,4 +1,9 @@
 @font-face {
+    font-family: 'simhei';
+    src: url('./fonts/simhei.ttf') format('truetype');
+}
+
+@font-face {
     font-family: 'SIMLI';
     src: url('./fonts/SIMLI.ttf') format('truetype');
 }
@@ -31,6 +36,23 @@ body {
     background-color: #f0f0f0;
 }
 
+.header {
+    background-color: #5279e4;
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+    color: white;
+    font-weight: bold;
+}
+
+.footer {
+    background-color: #f1f1f1;
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+    margin-top: 20px;
+}
+
 .container {
     width: 100%;
     max-width: 1200px;
@@ -40,7 +62,7 @@ body {
     border-radius: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin: 2px auto;
-    margin-top: 40px;
+    margin-top: 20px;
 }
 
 .preview {

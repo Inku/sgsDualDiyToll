@@ -1,6 +1,6 @@
 WebFont.load({
     custom: {
-        families: ['HanYiTianMaXing', 'SIMLI', 'JinMeiMaoCao', 'HuaKangXinZhuan', 'HanYiZhongYuan']
+        families: ['HanYiTianMaXing', 'simhei', 'SIMLI', 'JinMeiMaoCao', 'HuaKangXinZhuan', 'HanYiZhongYuan']
     },
     fontactive: function (familyName, fvd) {
         console.log('Font "' + familyName + '" has loaded.');
@@ -45,7 +45,7 @@ function drawCard() {
     drawCardTitle(ctx, document.getElementById('title').value);
     drawCardScore(ctx, document.getElementById('score').value);
     drawCardSkills(ctx, skills, faction);
-    drawCardBottomBorder(ctx, faction);
+    drawCardBottomBorder(ctx, faction, document.getElementById('designer').value, document.getElementById('num').value);
     drawCardQibing(ctx, qiBings, faction);
 }
 
@@ -78,9 +78,21 @@ function drawCardTopBorder(ctx, faction) {
     ctx.drawImage(img, 0, 0, img.width, img.height);
 }
 
-function drawCardBottomBorder(ctx, faction) {
+function drawCardBottomBorder(ctx, faction, designer, num) {
     const img = loadedImages[`${faction}-bottom`];
     ctx.drawImage(img, 0, canvas.height - img.height, img.width, img.height);
+
+    let x = 45;
+    let y = canvas.height - 35;
+    ctx.font = "bold 19px simhei";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "left";
+    ctx.fillText(designer, x, y);
+
+    x = 716;
+    ctx.font = "23px simhei";
+
+    ctx.fillText(num, x, y);
 }
 
 function drawCardHealth(ctx, health, faction) {
@@ -566,6 +578,8 @@ addSkillButton.addEventListener('click', () => {
             },
         ],
         name: '',
+        designer: '',
+        num: '',
     };
     skills.push(newSkill);
     updateSkillList();
