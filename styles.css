@@ -138,9 +138,13 @@ input[type="number"] {
     width: 70px;
 }
 
-input[type="text"],
-textarea {
-    width: 99%;
+#qi-bing {
+    width: 70px;
+}
+
+#add-qi-bing {
+    padding: 0px 10px;
+    margin-left: 10px;
 }
 
 .qi-bing-item {
@@ -280,6 +284,7 @@ input[type="file"] {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
@@ -296,4 +301,18 @@ input[type="file"] {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.inline-wrapper {
+    display: inline-flex;
+    align-items: flex-end;
+}
+
+.inline-wrapper label {
+    vertical-align: bottom;
+}
+
+.prompt {
+    font-size: 10px;
+    color: #999;
 }

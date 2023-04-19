@@ -6,7 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>对决DIY</title>
     <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mobile.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -32,32 +35,42 @@
                     <label class="radio-label"><input type="radio" name="faction" value="qun"> 群</label>
                 </fieldset>
 
-                <label for="score">分数:</label>
+                <label for="score">分数：</label>
                 <input type="number" id="score">
 
-                <label for="health">体力:</label>
+                <label for="health">体力：</label>
                 <input type="number" id="health">
 
-                <label for="name">名称:</label>
+                <label for="name">名称：</label>
                 <input type="text" id="name">
 
-                <label for="title">称号:</label>
+                <label for="title">称号：</label>
                 <input type="text" id="title">
 
-                <label for="qi-bing">奇兵 (回车确认，拖动排序):</label>
-                <input type="text" id="qi-bing">
+                <div class="inline-wrapper">
+                    <label for="qi-bing">奇兵：</label><label class="prompt">回车确认，拖动排序</label>
+                </div>
+                <div class="inline-wrapper">
+                    <input type="text" id="qi-bing">
+                    <button type="button" id="add-qi-bing" onclick="addQiBing()">添加</button>
+                </div>
                 <div id="qi-bing-list"></div>
 
-                <label for="image-upload">原画:</label>
+                <div class="inline-wrapper">
+                    <label for="image-upload">原画：</label><label class="prompt">建议使用像素大于942x1322的等比例宽高图片，以保证图像效果和避免画面被拉伸</label>
+                </div>
                 <input type="file" id="image-upload" accept="image/*" onchange="uploadImage(event)">
+                <img id="image-to-crop" style="display:none;">
+                <button type="button" id="crop-and-upload" style="display:none;"
+                    onclick="cropAndUpload()">裁剪并上传</button>
 
                 <div id="skill-list"></div>
                 <button type="button" id="add-skill">添加技能</button>
 
-                <label for="designer">设计者:</label>
+                <label for="designer">设计者：</label>
                 <input type="text" id="designer" value="™&© 2022 游卡桌游 .画师：">
 
-                <label for="num">卡片编号:</label>
+                <label for="num">卡片编号：</label>
                 <input type="text" id="num" value="DJ.">
             </form>
         </div>
@@ -69,7 +82,6 @@
         <br>
         Powered by Inku.&emsp; 素材提供：瞳木水杉
     </div>
-    <script src="script.js"></script>
     <div id="confirm-dialog" class="hidden">
         <div class="dialog-content">
             <p>确定要删除吗？</p>
@@ -85,6 +97,7 @@
             <p class="loading-text">正在加载...首次打开页面会耗时较久</p>
         </div>
     </div>
+    <script src="script.js"></script>
 </body>
 
 </html>

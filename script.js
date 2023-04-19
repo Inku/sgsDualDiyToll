@@ -26,7 +26,7 @@ function resetShadow(ctx) {
     ctx.shadowBlur = 0; // 清除阴影的模糊程度    
 }
 
-let img = new Image();
+let cardImage = new Image();
 const cardSize = {
     "maxEdge": 55,
     "fontSize": 37
@@ -49,29 +49,6 @@ function drawCard() {
     drawCardSkills(ctx, skills, faction);
     drawCardBottomBorder(ctx, faction, document.getElementById('designer').value, document.getElementById('num').value);
     drawCardQibing(ctx, qiBings, faction);
-}
-
-function uploadImage(event) {
-    // 获取上传的图片文件
-    const file = event.target.files[0];
-    // 创建 FileReader 对象以读取图片
-    const reader = new FileReader();
-    // 当读取操作成功完成时触发
-    reader.onload = function (e) {
-        // 显示 loading 元素
-        document.getElementById('loading').classList.remove('hidden');
-        // 当图像加载完成时触发
-        img.onload = function () {
-            // 隐藏 loading 元素
-            document.getElementById('loading').classList.add('hidden');
-            // 调用 drawCard() 函数绘制图片
-            drawCard();
-        };
-        // 设置图像源
-        img.src = e.target.result;
-    };
-    // 读取文件并将其转换为 DataURL
-    reader.readAsDataURL(file);
 }
 
 function drawCardTopBorder(ctx, faction) {
@@ -108,10 +85,95 @@ function drawCardHealth(ctx, health, faction) {
 
 function drawCardImg(ctx) {
     // 绘制图像
-    if (img.complete) { // 如果图片已加载完成，绘制图片
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    if (cardImage.complete) { // 如果图片已加载完成，绘制图片
+        ctx.drawImage(cardImage, 0, 0, canvas.width, canvas.height);
     }
 }
+
+function uploadImage(event) {
+    // 获取上传的图片文件
+    const file = event.target.files[0];
+    // 创建 FileReader 对象以读取图片
+    const reader = new FileReader();
+    // 当读取操作成功完成时触发
+    reader.onload = function (e) {
+        // 显示 loading 元素
+        document.getElementById('loading').classList.remove('hidden');
+        // 当图像加载完成时触发
+        cardImage.onload = function () {
+            // 隐藏 loading 元素
+            document.getElementById('loading').classList.add('hidden');
+            // 调用 drawCard() 函数绘制图片
+            drawCard();
+        };
+        // 设置图像源
+        cardImage.src = e.target.result;
+    };
+    // 读取文件并将其转换为 DataURL
+    reader.readAsDataURL(file);
+}
+
+/* let cropper;
+
+// 处理图片上传
+function uploadImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const imageToCrop = document.getElementById("image-to-crop");
+            imageToCrop.src = e.target.result;
+            imageToCrop.style.display = "block";
+
+            imageToCrop.onload = function () {
+                const imageWidth = this.naturalWidth;
+                const imageHeight = this.naturalHeight;
+
+                if (cropper) {
+                    cropper.destroy();
+                }
+                cropper = new Cropper(imageToCrop, {
+                    aspectRatio: 942 / 1322,
+                    minContainerWidth: 300,
+                    minContainerHeight: 450,
+                    minCropBoxWidth: 300,
+                    minCropBoxHeight: 450,
+                    // Set the maximum canvas dimensions based on the image size
+                    maxCanvasWidth: imageWidth,
+                    maxCanvasHeight: imageHeight,
+                    crop(event) {
+                        // handle cropping event
+                    },
+                });
+            };
+
+            const cropAndUploadButton = document.getElementById("crop-and-upload");
+            cropAndUploadButton.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// 裁剪并上传图片
+function cropAndUpload() {
+    if (cropper) {
+        const croppedCanvas = cropper.getCroppedCanvas();
+        const croppedImageDataURL = croppedCanvas.toDataURL("image/png");
+        cardImage.onload = function () {
+            document.getElementById('loading').classList.add('hidden');
+            drawCard();
+        };
+        cardImage.src = croppedImageDataURL;
+        drawCard();
+
+        cropper.destroy();
+        cropper = null;
+        const imageToCrop = document.getElementById("image-to-crop");
+        imageToCrop.style.display = "none";
+        const cropAndUploadButton = document.getElementById("crop-and-upload");
+        cropAndUploadButton.style.display = "none";
+    }
+} */
 
 function drawCardName(ctx, name) {
     let x = 131;
@@ -516,19 +578,23 @@ const qiBingList = document.getElementById('qi-bing-list');
 const qiBings = [];
 const qiBingMap = { "杀": "殺", "闪": "閃" }
 
+function addQiBing() {
+    if (qiBingInput.value.trim() !== '') {
+        let qibing = qiBingInput.value.trim();
+        let fan = qiBingMap[qibing];
+        if (fan != undefined && fan.length > 0) {
+            qibing = fan;
+        }
+        qiBings.push(qibing);
+        updateqiBingList();
+        qiBingInput.value = '';
+    }
+}
+
 qiBingInput.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
         event.preventDefault();
-        if (this.value.trim() !== '') {
-            let qibing = this.value.trim();
-            let fan = qiBingMap[qibing];
-            if (fan != undefined && fan.length > 0) {
-                qibing = fan;
-            }
-            qiBings.push(qibing);
-            updateqiBingList();
-            this.value = '';
-        }
+        addQiBing(); // 调用新创建的 addQiBing 函数
     }
 });
 
@@ -757,20 +823,6 @@ function loadImages(imageFilenames) {
     return Promise.all(promises);
 }
 
-document.getElementById('save-image').addEventListener('click', function () {
-    const image = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-
-    link.href = image;
-    let name = document.getElementById('name').value;
-    if (!name) {
-        name = 'card';
-    }
-    link.download = 'card.png';
-    link.click();
-});
-
-
 const imageFilenames = {
     "shu-top": "shu-top.png",
     "shu-bottom": "shu-bottom.png",
@@ -794,6 +846,20 @@ const imageFilenames = {
     "diamond": "diamond.png"
 };
 const loadedImages = {};
+
+document.getElementById('save-image').addEventListener('click', function () {
+    const image = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+
+    link.href = image;
+    let name = document.getElementById('name').value;
+    if (!name) {
+        name = 'card';
+    }
+    link.download = 'card.png';
+    link.click();
+});
+
 window.onload = function () {
     loadImages(imageFilenames)
         .then((imageList) => {
