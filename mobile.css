@@ -12,6 +12,8 @@
     .editor {
         padding: 0;
         margin: 0 auto;
+        overflow-y: none;
+        max-height: 100%;
     }
 
     #canvas-container {
