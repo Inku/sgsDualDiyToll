@@ -1,21 +1,25 @@
 @font-face {
     font-family: 'simhei';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/simhei.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/simhei.woff2') format('woff2'),
+        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/simhei.woff') format('woff');
 }
 
 @font-face {
     font-family: 'SIMLI';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/SIMLI.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/SIMLI.woff2') format('woff2'),
+        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/SIMLI.woff') format('woff');
 }
 
 @font-face {
     font-family: 'JinMeiMaoCao';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/JinMeiMaoCao.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/JinMeiMaoCao.woff2') format('woff2'),
+        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/JinMeiMaoCao.woff') format('woff');
 }
 
 @font-face {
     font-family: 'HuaKangXinZhuan';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HuaKangXinZhuan.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HuaKangXinZhuan.woff2') format('woff2'),
+        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HuaKangXinZhuan.woff') format('woff');
 }
 
 @font-face {
@@ -26,7 +30,8 @@
 
 @font-face {
     font-family: 'HanYiZhongYuan';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiZhongYuan.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiZhongYuan.woff2') format('woff2'),
+        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiZhongYuan.woff') format('woff');
 }
 
 html,

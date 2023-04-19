@@ -7,7 +7,6 @@ WebFont.load({
         console.log('Font "' + familyName + '" has loaded.');
     },
     active: function () {
-        document.getElementById('loading').classList.add('hidden');
         console.log('All fonts have loaded.');
     }
 });
