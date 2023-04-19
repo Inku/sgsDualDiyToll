@@ -1,31 +1,32 @@
 @font-face {
     font-family: 'simhei';
-    src: url('./fonts/simhei.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/simhei.ttf') format('truetype');
 }
 
 @font-face {
     font-family: 'SIMLI';
-    src: url('./fonts/SIMLI.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/SIMLI.ttf') format('truetype');
 }
 
 @font-face {
     font-family: 'JinMeiMaoCao';
-    src: url('./fonts/金梅毛草行国际码.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/JinMeiMaoCao.ttf') format('truetype');
 }
 
 @font-face {
     font-family: 'HuaKangXinZhuan';
-    src: url('./fonts/华康新篆体.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HuaKangXinZhuan.ttf') format('truetype');
 }
 
 @font-face {
     font-family: 'HanYiTianMaXing';
-    src: url('./fonts/汉仪天马行楷.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiTianMaXing.woff2') format('woff2'),
+        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiTianMaXing.woff') format('woff');
 }
 
 @font-face {
     font-family: 'HanYiZhongYuan';
-    src: url('./fonts/汉仪中圆简.ttf') format('truetype');
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiZhongYuan.ttf') format('truetype');
 }
 
 html,
@@ -143,7 +144,7 @@ input[type="number"] {
 }
 
 #add-qi-bing {
-    padding: 0px 10px;
+    padding: 2px 10px;
     margin-left: 10px;
 }
 
