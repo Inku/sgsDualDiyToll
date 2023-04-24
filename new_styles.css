@@ -34,6 +34,18 @@
         url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiZhongYuan.woff') format('woff');
 }
 
+@font-face {
+    font-family: 'Jxixinkai';
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/subset-Jxixinkai.woff2') format('woff2'),
+        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/subset-Jxixinkai.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'HKwawa';
+    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/subset-HKwawa.woff2') format('woff2'),
+        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/subset-HKwawa.woff') format('woff');
+}
+
 html,
 body {
     font-family: Arial, sans-serif;

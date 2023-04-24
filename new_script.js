@@ -1,6 +1,6 @@
 WebFont.load({
     custom: {
-        families: ['HanYiTianMaXing', 'simhei', 'SIMLI', 'JinMeiMaoCao', 'HuaKangXinZhuan', 'HanYiZhongYuan']
+        families: ['HanYiTianMaXing', 'simhei', 'SIMLI', 'JinMeiMaoCao', 'HuaKangXinZhuan', 'HanYiZhongYuan', 'Jxixinkai', 'HKwawa']
     },
     fontactive: function (familyName, fvd) {
         document.getElementById('loading').classList.remove('hidden');
@@ -8,6 +8,7 @@ WebFont.load({
     },
     active: function () {
         console.log('All fonts have loaded.');
+        document.getElementById('loading').classList.add('hidden');
     }
 });
 
@@ -236,9 +237,9 @@ function drawCardTitle(ctx, title) {
 }
 
 function drawCardScore(ctx, score) {
-    const x = 123;
-    const y = 197;
-    ctx.font = "160px HanYiTianMaXing";
+    const x = 122;
+    const y = 204;
+    ctx.font = "195px Jxixinkai";
 
     ctx.lineWidth = 4;
     ctx.strokeStyle = "white";
@@ -441,20 +442,20 @@ function drawEffectTrigger(ctx, effect, startY, topEdge) {
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
 
-    ctx.font = cardSize["fontSize"] + "px Arial";
+    ctx.font = cardSize["fontSize"] + "px HKwawa";
     ctx.fillText("【", textX, textY);
 
     ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
-    ctx.fillText(text, textX + cardSize["fontSize"] + 4, textY);
+    ctx.fillText(text, textX + cardSize["fontSize"] + 4, textY-2);
 
-    ctx.font = cardSize["fontSize"] + "px Arial";
+    ctx.font = cardSize["fontSize"] + "px HKwawa";
     ctx.fillText("】", textX + cardSize["fontSize"] + 8 + textWidth, textY);
 }
 
 function drawEffectText(ctx, effect, startY, topEdge, fillText) {
     ctx.textAlign = "left";
     const sideEdgeWidth = cardSize["maxEdge"];
-    const x = 357;
+    const x = 351;
     const y = startY + topEdge + 29;
     let beginX = x;
     let beginY = y;
@@ -512,16 +513,33 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
         //TODO 判定结果绘图
 
         for (let j = 0; j < text.length; j++) {
-            let position = getTextBounds(ctx, text[j], beginX, beginY);
+            let char = text[j];
+            let position = getTextBounds(ctx, char, beginX, beginY);
             //超宽换行
             if (position.x + position.width > canvas.width - sideEdgeWidth) {
                 beginX = sideEdgeWidth;
                 beginY = position.y + position.height + 13 + cardSize["fontSize"];
                 lineNum++;
             }
-            position = getTextBounds(ctx, text[j], beginX, beginY);
+            position = getTextBounds(ctx, char, beginX, beginY);
             if (fillText) {
-                ctx.fillText(text[j], beginX, beginY);
+                if (char == "【") {
+                    ctx.font = cardSize["fontSize"] + "px HKwawa";
+                    //起始向左偏移4像素
+                    beginX -= 4;
+                    //文字向下偏移2像素
+                    ctx.fillText(char, beginX, beginY + 2);
+                    ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
+                } else if (char == "】") {
+                    ctx.font = cardSize["fontSize"] + "px HKwawa";
+                    //起始向右偏移4像素
+                    beginX += 4;
+                    //文字向下偏移2像素
+                    ctx.fillText(char, beginX, beginY + 2);
+                    ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
+                } else {
+                    ctx.fillText(char, beginX, beginY);
+                }
             }
             beginX = position.x + position.width;
         }
@@ -866,7 +884,6 @@ window.onload = function () {
                 loadedImages[key] = img;
             });
             drawCard();
-            document.getElementById('loading').classList.add('hidden');
         })
         .catch((error) => {
             console.error('Error loading images:', error);
