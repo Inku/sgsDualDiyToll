@@ -86,7 +86,7 @@ function drawCardHealth(ctx, health, faction) {
 function drawCardImg(ctx) {
     // 绘制图像
     if (cardImage.complete) { // 如果图片已加载完成，绘制图片
-        ctx.drawImage(cardImage, 0, 105, canvas.width, canvas.height-170);
+        ctx.drawImage(cardImage, 0, 105, canvas.width, canvas.height - 170);
     }
 }
 
@@ -446,7 +446,7 @@ function drawEffectTrigger(ctx, effect, startY, topEdge) {
     ctx.fillText("【", textX, textY);
 
     ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
-    ctx.fillText(text, textX + cardSize["fontSize"] + 4, textY-2);
+    ctx.fillText(text, textX + cardSize["fontSize"] + 4, textY - 2);
 
     ctx.font = cardSize["fontSize"] + "px HKwawa";
     ctx.fillText("】", textX + cardSize["fontSize"] + 8 + textWidth, textY);
@@ -593,7 +593,7 @@ function drawCardQibing(ctx, qiBings, faction) {
 const qiBingInput = document.getElementById('qi-bing');
 const qiBingList = document.getElementById('qi-bing-list');
 const qiBings = [];
-const qiBingMap = { "杀": "殺", "闪": "閃" }
+const qiBingMap = { "杀": "殺", "闪": "閃", "决": "決" }
 
 function addQiBing() {
     if (qiBingInput.value.trim() !== '') {
