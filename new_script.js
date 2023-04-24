@@ -86,7 +86,7 @@ function drawCardHealth(ctx, health, faction) {
 function drawCardImg(ctx) {
     // 绘制图像
     if (cardImage.complete) { // 如果图片已加载完成，绘制图片
-        ctx.drawImage(cardImage, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(cardImage, 0, 105, canvas.width, canvas.height-170);
     }
 }
 
