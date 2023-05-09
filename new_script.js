@@ -593,7 +593,7 @@ function drawCardQibing(ctx, qiBings, faction) {
 const qiBingInput = document.getElementById('qi-bing');
 const qiBingList = document.getElementById('qi-bing-list');
 const qiBings = [];
-const qiBingMap = { "杀": "殺", "闪": "閃", "决": "決" }
+const qiBingMap = { "杀": "殺", "闪": "閃", "决": "決", "风": "風" }
 
 function addQiBing() {
     if (qiBingInput.value.trim() !== '') {
