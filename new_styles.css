@@ -70,6 +70,16 @@ body {
     margin-top: 20px;
 }
 
+.footer a {
+    color: inherit;          /* 继承父元素的颜色 */
+    text-decoration: none;   /* 无下划线 */
+}
+
+.footer a:hover {
+    color: inherit;          /* 悬停时继承颜色 */
+    text-decoration: underline;
+}
+
 .container {
     width: 100%;
     max-width: 1200px;
