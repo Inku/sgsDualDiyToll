@@ -44,19 +44,14 @@
 
                 <label for="name">名称：</label>
                 <div class="inline-wrapper">
-                    <input type="text" id="name">
+                    <input type="text" id="name" class="text-input">
                     <span id="name-traditional" class="traditional-output"></span>
                 </div>
-                
+
                 <label for="title">称号：</label>
                 <div class="inline-wrapper">
-                    <input type="text" id="title">
+                    <input type="text" id="title" class="text-input">
                     <span id="title-traditional" class="traditional-output"></span>
-                </div>
-                
-                <div class="inline-wrapper">
-                    <label for="auto-convert">自动转换：</label>
-                    <input type="checkbox" id="auto-convert" checked>
                 </div>
 
                 <div class="inline-wrapper">
@@ -69,8 +64,10 @@
                 <div id="qi-bing-list"></div>
 
                 <div class="image-controls">
-                    <button type="button" id="upload-button" onclick="document.getElementById('image-upload').click()">上传原画</button>
-                    <input type="file" id="image-upload" accept="image/*" onchange="uploadImage(event)" style="display: none;">
+                    <button type="button" id="upload-button"
+                        onclick="document.getElementById('image-upload').click()">上传原画</button>
+                    <input type="file" id="image-upload" accept="image/*" onchange="uploadImage(event)"
+                        style="display: none;">
                     <button type="button" onclick="zoomIn()">+</button>
                     <button type="button" onclick="zoomOut()">-</button>
                     <button type="button" onclick="resetImage()">重置</button>
@@ -90,6 +87,16 @@
 
                 <label for="num">卡片编号：</label>
                 <input type="text" id="num" value="DJ.">
+
+                <div class="custom-divider"></div>
+
+                <div class="inline-wrapper auto-convert-container">
+                    <label for="auto-convert">简繁转换：</label>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="auto-convert" class="custom-checkbox" checked>
+                        <label class="checkbox-label" for="auto-convert"></label>
+                    </div>
+                </div>
             </form>
         </div>
     </div>

@@ -119,6 +119,7 @@ textarea {
 
 input,
 textarea,
+.traditional-output,
 button {
     margin: 5px 0;
 }
@@ -360,5 +361,57 @@ input[type="file"] {
 
 .traditional-output {
     margin-left: 10px;
-    color: #555; /* 可根据需要调整颜色 */
+    color: #555;
+    font-style: italic; /* 斜体显示以区分 */
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+}
+
+.custom-checkbox {
+    display: none; /* 隐藏默认复选框 */
+}
+
+.checkbox-label {
+    width: 40px; /* 自定义复选框的宽度 */
+    height: 20px; /* 自定义复选框的高度 */
+    background-color: #ccc; /* 默认背景色 */
+    border-radius: 10px; /* 圆角 */
+    position: relative; /* 方便放置滑块 */
+    transition: background-color 0.3s ease; /* 背景色渐变效果 */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
+    cursor: pointer; /* 鼠标悬停时显示为手型 */
+}
+
+.checkbox-label:after {
+    content: "";
+    width: 16px; /* 滑块宽度 */
+    height: 16px; /* 滑块高度 */
+    background-color: white; /* 滑块的背景色 */
+    border-radius: 50%; /* 滑块圆角 */
+    position: absolute;
+    top: 2px; /* 上边距 */
+    left: 2px; /* 左边距 */
+    transition: transform 0.3s ease; /* 滑块移动效果 */
+}
+
+/* 当复选框被选中时 */
+.custom-checkbox:checked + .checkbox-label {
+    background-color: #3498db; /* 选中时的背景色 */
+}
+
+.custom-checkbox:checked + .checkbox-label:after {
+    transform: translateX(20px); /* 滑块移动 */
+}
+
+/* 悬停时的效果 */
+.checkbox-container:hover .checkbox-label {
+    background-color: #73c3f8; /* 悬停时的背景色 */
+}
+
+.custom-divider {
+    border-top: 2px solid #ccc;
+    margin: 20px 0;
 }
