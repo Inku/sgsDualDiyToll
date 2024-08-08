@@ -56,14 +56,20 @@
                 </div>
                 <div id="qi-bing-list"></div>
 
-                <div class="inline-wrapper">
-                    <label for="image-upload">原画：</label><label class="prompt">建议使用像素大于942x1047的等比例宽高图片，以保证图像效果和避免画面被拉伸</label>
+                <div class="image-controls">
+                    <button type="button" id="upload-button" onclick="document.getElementById('image-upload').click()">上传原画</button>
+                    <input type="file" id="image-upload" accept="image/*" onchange="uploadImage(event)" style="display: none;">
+                    <button type="button" onclick="zoomIn()">+</button>
+                    <button type="button" onclick="zoomOut()">-</button>
+                    <button type="button" onclick="resetImage()">重置</button>
                 </div>
-                <input type="file" id="image-upload" accept="image/*" onchange="uploadImage(event)">
-                <img id="image-to-crop" style="display:none;">
-                <button type="button" id="crop-and-upload" style="display:none;"
-                    onclick="cropAndUpload()">裁剪并上传</button>
 
+                <div class="controls">
+                    <button type="button" onclick="moveImage(0, -10)">上移</button>
+                    <button type="button" onclick="moveImage(0, 10)">下移</button>
+                    <button type="button" onclick="moveImage(-10, 0)">左移</button>
+                    <button type="button" onclick="moveImage(10, 0)">右移</button>
+                </div>
                 <div id="skill-list"></div>
                 <button type="button" id="add-skill">添加技能</button>
 

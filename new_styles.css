@@ -45,6 +45,16 @@
         url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/subset-HKwawa.woff') format('woff');
 }
 
+@font-face {
+    font-family: 'hyxkj';
+    src: url('https://x0.ifengimg.com/ucms/2024/0808/1f5578f2671941e7ca84ca95f89eff20.woff2') format("woff2")
+}
+
+@font-face {
+    font-family: 'AdobeHeiStd';
+    src: url('https://x0.ifengimg.com/ucms/2024/0808/6e709c085b539ef900c27fa9e604b1a0.woff2') format("woff2")
+}
+
 html,
 body {
     font-family: Arial, sans-serif;

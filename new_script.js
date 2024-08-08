@@ -13,6 +13,13 @@ WebFont.load({
 });
 
 const canvas = document.getElementById('card-canvas');
+const ctx = canvas.getContext('2d');
+let cardImage = new Image();
+let scale = 1; // 缩放比例
+let posX = 0;  // 图片X坐标
+let posY = 0;  // 图片Y坐标
+const centerX = canvas.width / 2; // 画布中心X
+const centerY = canvas.height / 2; // 画布中心Y
 
 const inputs = document.querySelectorAll('input, select');
 inputs.forEach(input => {
@@ -26,17 +33,13 @@ function resetShadow(ctx) {
     ctx.shadowBlur = 0; // 清除阴影的模糊程度    
 }
 
-let cardImage = new Image();
 const cardSize = {
     "maxEdge": 55,
     "fontSize": 37
 }
 
 function drawCard() {
-    const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const card = document.getElementById('card');
-
     const faction = document.querySelector('input[name="faction"]:checked').value;
     const health = document.getElementById('health').value;
 
@@ -62,13 +65,13 @@ function drawCardBottomBorder(ctx, faction, designer, num) {
 
     let x = 45;
     let y = canvas.height - 35;
-    ctx.font = "bold 19px simhei";
+    ctx.font = "bold 18px AdobeHeiStd";
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
     ctx.fillText(designer, x, y);
 
     x = 716;
-    ctx.font = "23px simhei";
+    ctx.font = "21px AdobeHeiStd";
 
     ctx.fillText(num, x, y);
 }
@@ -86,94 +89,52 @@ function drawCardHealth(ctx, health, faction) {
 function drawCardImg(ctx) {
     // 绘制图像
     if (cardImage.complete) { // 如果图片已加载完成，绘制图片
-        ctx.drawImage(cardImage, 0, 105, canvas.width, canvas.height - 170);
+        ctx.drawImage(cardImage, posX, posY, cardImage.width * scale, cardImage.height * scale);
     }
 }
 
 function uploadImage(event) {
-    // 获取上传的图片文件
     const file = event.target.files[0];
-    // 创建 FileReader 对象以读取图片
     const reader = new FileReader();
-    // 当读取操作成功完成时触发
     reader.onload = function (e) {
-        // 显示 loading 元素
         document.getElementById('loading').classList.remove('hidden');
-        // 当图像加载完成时触发
         cardImage.onload = function () {
-            // 隐藏 loading 元素
             document.getElementById('loading').classList.add('hidden');
-            // 调用 drawCard() 函数绘制图片
+            // 计算居中位置
+            posX = centerX - (cardImage.width * scale) / 2;
+            posY = centerY - (cardImage.height * scale) / 2;
             drawCard();
         };
-        // 设置图像源
         cardImage.src = e.target.result;
     };
-    // 读取文件并将其转换为 DataURL
     reader.readAsDataURL(file);
 }
 
-/* let cropper;
-
-// 处理图片上传
-function uploadImage(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const imageToCrop = document.getElementById("image-to-crop");
-            imageToCrop.src = e.target.result;
-            imageToCrop.style.display = "block";
-
-            imageToCrop.onload = function () {
-                const imageWidth = this.naturalWidth;
-                const imageHeight = this.naturalHeight;
-
-                if (cropper) {
-                    cropper.destroy();
-                }
-                cropper = new Cropper(imageToCrop, {
-                    aspectRatio: 942 / 1322,
-                    minContainerWidth: 300,
-                    minContainerHeight: 450,
-                    minCropBoxWidth: 300,
-                    minCropBoxHeight: 450,
-                    // Set the maximum canvas dimensions based on the image size
-                    maxCanvasWidth: imageWidth,
-                    maxCanvasHeight: imageHeight,
-                    crop(event) {
-                        // handle cropping event
-                    },
-                });
-            };
-
-            const cropAndUploadButton = document.getElementById("crop-and-upload");
-            cropAndUploadButton.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-    }
+function resetImage() {
+    scale = 1; // 重置缩放比例
+    posX = centerX - (cardImage.width * scale) / 2; // 重置X坐标
+    posY = centerY - (cardImage.height * scale) / 2; // 重置Y坐标
+    drawCard(); // 重新绘制卡片
 }
 
-// 裁剪并上传图片
-function cropAndUpload() {
-    if (cropper) {
-        const croppedCanvas = cropper.getCroppedCanvas();
-        const croppedImageDataURL = croppedCanvas.toDataURL("image/png");
-        cardImage.onload = function () {
-            document.getElementById('loading').classList.add('hidden');
-            drawCard();
-        };
-        cardImage.src = croppedImageDataURL;
-        drawCard();
+function zoomIn() {
+    scale *= 1.1; // 放大10%
+    drawCard();
+}
 
-        cropper.destroy();
-        cropper = null;
-        const imageToCrop = document.getElementById("image-to-crop");
-        imageToCrop.style.display = "none";
-        const cropAndUploadButton = document.getElementById("crop-and-upload");
-        cropAndUploadButton.style.display = "none";
-    }
-} */
+function zoomOut() {
+    scale /= 1.1; // 缩小10%
+    // 计算新的位置，使得图片中心保持在画布中心
+    posX = centerX - (cardImage.width * scale) / 2;
+    posY = centerY - (cardImage.height * scale) / 2;
+    drawCard();
+}
+
+function moveImage(dx, dy) {
+    posX += dx;
+    posY += dy;
+    drawCard();
+}
 
 function drawCardName(ctx, name) {
     let x = 131;
@@ -239,7 +200,7 @@ function drawCardTitle(ctx, title) {
 function drawCardScore(ctx, score) {
     const x = 122;
     const y = 204;
-    ctx.font = "195px Jxixinkai";
+    ctx.font = "195px hyxkj";
 
     ctx.lineWidth = 4;
     ctx.strokeStyle = "white";
@@ -867,14 +828,34 @@ const loadedImages = {};
 document.getElementById('save-image').addEventListener('click', function () {
     const image = canvas.toDataURL('image/png');
     const link = document.createElement('a');
-
     link.href = image;
     let name = document.getElementById('name').value;
     if (!name) {
         name = 'card';
     }
-    link.download = 'card.png';
+    link.download = name + '.png';
     link.click();
+});
+
+let isDragging = false; // 是否正在拖动
+let startX, startY; // 拖动开始时的坐标
+
+canvas.addEventListener('mousedown', (event) => {
+    isDragging = true;
+    startX = event.offsetX - posX; // 记录点击时的偏移
+    startY = event.offsetY - posY; // 记录点击时的偏移
+});
+
+canvas.addEventListener('mouseup', () => {
+    isDragging = false; // 停止拖动
+});
+
+canvas.addEventListener('mousemove', (event) => {
+    if (isDragging) {
+        posX = event.offsetX - startX; // 更新X坐标
+        posY = event.offsetY - startY; // 更新Y坐标
+        drawCard(); // 重新绘制卡片
+    }
 });
 
 window.onload = function () {
