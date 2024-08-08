@@ -38,16 +38,56 @@ const cardSize = {
     "fontSize": 37
 }
 
+let autoConvert = true; // 默认开启自动转换
+const converter = OpenCC.Converter({ from: 'cn', to: 'hk' });
+
+// 更新繁体字的显示
+async function updateTraditionalText() {
+    const nameInput = document.getElementById('name');
+    const titleInput = document.getElementById('title');
+    const nameTraditional = document.getElementById('name-traditional');
+    const titleTraditional = document.getElementById('title-traditional');
+
+    if (autoConvert) {
+        // 进行简体到繁体的转换
+        const traditionalName = await converter(nameInput.value);
+        const traditionalTitle = await converter(titleInput.value);
+
+        // 更新繁体字显示
+        nameTraditional.textContent = traditionalName;
+        titleTraditional.textContent = traditionalTitle;
+    } else {
+        // 如果开关关闭，清空繁体字显示
+        nameTraditional.textContent = '';
+        titleTraditional.textContent = '';
+    }
+    // 在画布中绘制繁体字
+    drawCard(); // 重新绘制图卡以包含繁体字
+}
+
+// 监听自动转换开关的变化
+document.getElementById('auto-convert').addEventListener('change', function () {
+    autoConvert = this.checked; // 更新自动转换状态
+    updateTraditionalText(); // 立即更新显示
+});
+
+// 监听输入框的输入事件
+document.getElementById('name').addEventListener('input', updateTraditionalText);
+document.getElementById('title').addEventListener('input', updateTraditionalText);
+
 function drawCard() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const faction = document.querySelector('input[name="faction"]:checked').value;
     const health = document.getElementById('health').value;
+    // 获取繁体字
+    const name = autoConvert ? document.getElementById('name-traditional').textContent : document.getElementById('name').value;
+    const title = autoConvert ? document.getElementById('title-traditional').textContent : document.getElementById('title').value;
 
     drawCardImg(ctx);
     drawCardTopBorder(ctx, faction);
     drawCardHealth(ctx, health, faction);
-    drawCardName(ctx, document.getElementById('name').value);
-    drawCardTitle(ctx, document.getElementById('title').value);
+    drawCardName(ctx, name);
+    drawCardTitle(ctx, title);
     drawCardScore(ctx, document.getElementById('score').value);
     drawCardSkills(ctx, skills, faction);
     drawCardBottomBorder(ctx, faction, document.getElementById('designer').value, document.getElementById('num').value);

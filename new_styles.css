@@ -357,3 +357,8 @@ input[type="file"] {
     font-size: 10px;
     color: #999;
 }
+
+.traditional-output {
+    margin-left: 10px;
+    color: #555; /* 可根据需要调整颜色 */
+}
