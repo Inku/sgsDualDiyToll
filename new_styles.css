@@ -83,6 +83,14 @@ body {
 .footer a {
     color: inherit;          /* 继承父元素的颜色 */
     text-decoration: none;   /* 无下划线 */
+    color: var(--theme-font-color, #b6c4d4);
+    text-decoration: none;
+    vertical-align: middle;
+    line-height: 1.5em;
+    font-size: 16px;
+    font-weight: 400;
+    display: inline-flex;
+    align-items: center;
 }
 
 .footer a:hover {
