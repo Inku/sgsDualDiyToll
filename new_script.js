@@ -866,15 +866,13 @@ const imageFilenames = {
 const loadedImages = {};
 
 document.getElementById('save-image').addEventListener('click', function () {
-    const image = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.href = image;
-    let name = document.getElementById('name').value;
-    if (!name) {
-        name = 'card';
-    }
-    link.download = name + '.png';
-    link.click();
+    canvas.toBlob(function (blob) {
+        let name = document.getElementById('name').value;
+        if (!name) {
+            name = 'card';
+        }
+        saveAs(blob, name + '.png'); // 使用file-saver库的saveAs方法
+    }, 'image/png');
 });
 
 let isDragging = false; // 是否正在拖动
