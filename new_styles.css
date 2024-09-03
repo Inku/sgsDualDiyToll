@@ -230,7 +230,6 @@ input[type="number"] {
     flex-direction: column;
     gap: 15px;
     padding: 0 50px;
-    overflow-y: auto;
     max-height: 842px;
 }
 

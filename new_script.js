@@ -896,6 +896,34 @@ canvas.addEventListener('mousemove', (event) => {
     }
 });
 
+let isShrunk = false;
+
+window.addEventListener('scroll', function () {
+    const preview = document.querySelector('.preview');
+    const editor = document.querySelector('.editor');
+    const canvasContainer = document.getElementById('canvas-container');
+    const scrollThreshold = 50; // 滚动阈值，用户滚动超过这个值时触发缩小效果
+
+    if (window.scrollY > scrollThreshold && !isShrunk) {
+        isShrunk = true;
+        requestAnimationFrame(() => {
+            preview.classList.add('shrink');
+            editor.classList.add('shrink');
+
+            // 计算缩小后的画布高度
+            const canvasHeight = canvasContainer.offsetHeight * 0.5; // 缩小到50%
+            editor.style.marginTop = `${canvasHeight + 30}px`; // 根据需要调整这个值
+        });
+    } else if (window.scrollY <= scrollThreshold && isShrunk) {
+        isShrunk = false;
+        requestAnimationFrame(() => {
+            preview.classList.remove('shrink');
+            editor.classList.remove('shrink');
+            editor.style.marginTop = ''; // 还原 margin-top
+        });
+    }
+});
+
 window.onload = function () {
     loadImages(imageFilenames)
         .then((imageList) => {
