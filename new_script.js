@@ -904,6 +904,11 @@ window.addEventListener('scroll', function () {
     const canvasContainer = document.getElementById('canvas-container');
     const scrollThreshold = 50; // 滚动阈值，用户滚动超过这个值时触发缩小效果
 
+    const isPortrait = window.innerHeight > window.innerWidth;
+    if (!isPortrait) {
+        return;
+    }
+
     if (window.scrollY > scrollThreshold && !isShrunk) {
         isShrunk = true;
         requestAnimationFrame(() => {
