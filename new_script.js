@@ -12,6 +12,8 @@ WebFont.load({
     }
 });
 
+const numberCounter = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"]
+
 const canvas = document.getElementById('card-canvas');
 const ctx = canvas.getContext('2d');
 let cardImage = new Image();
@@ -34,9 +36,61 @@ function resetShadow(ctx) {
 }
 
 const cardSize = {
-    "maxEdge": 55,
-    "fontSize": 37
+    "verticalEdge": 55,
+    "horizontalEdge": 55,
+    "fontSize": 37,
+    "lineHeight": 13,
+    "tagSpacing": 18
 }
+cardSize["scale"] = cardSize.fontSize / 37;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const fontSizeSlider = document.getElementById('font-size-slider');
+    const fontSizeValue = document.getElementById('font-size-value');
+    fontSizeSlider.addEventListener('input', function () {
+        const fontSize = fontSizeSlider.value;
+        fontSizeValue.textContent = fontSize;
+        cardSize.fontSize = parseInt(fontSize, 10);
+        cardSize["scale"] = cardSize.fontSize / 37;
+        drawCard();
+    });
+
+    const lineHeightSlider = document.getElementById('line-height-slider');
+    const lineHeightValue = document.getElementById('line-height-value');
+    lineHeightSlider.addEventListener('input', function () {
+        const lineHeight = lineHeightSlider.value;
+        lineHeightValue.textContent = lineHeight;
+        cardSize.lineHeight = parseInt(lineHeight);
+        drawCard();
+    });
+
+    const horizontalEdgeSizeSlider = document.getElementById('horizontal-edge-size-slider');
+    const horizontalEdgeSizeValue = document.getElementById('horizontal-edge-size-value');
+    horizontalEdgeSizeSlider.addEventListener('input', function () {
+        const horizontalEdgeSize = horizontalEdgeSizeSlider.value;
+        horizontalEdgeSizeValue.textContent = horizontalEdgeSize;
+        cardSize.horizontalEdge = parseInt(horizontalEdgeSize);
+        drawCard();
+    });
+
+    // const verticalEdgeSizeSlider = document.getElementById('vertical-edge-size-slider');
+    // const verticalEdgeSizeValue = document.getElementById('vertical-edge-size-value');
+    // verticalEdgeSizeSlider.addEventListener('input', function () {
+    //     const verticalEdgeSize = verticalEdgeSizeSlider.value;
+    //     verticalEdgeSizeValue.textContent = verticalEdgeSize;
+    //     cardSize.verticalEdge = parseInt(verticalEdgeSize);
+    //     drawCard();
+    // });
+
+    document.getElementById('toggle-sliders').addEventListener('click', function () {
+        const sliderContainer = document.getElementById('slider-container');
+        if (sliderContainer.classList.contains('hidden')) {
+            sliderContainer.classList.remove('hidden');
+        } else {
+            sliderContainer.classList.add('hidden');
+        }
+    });
+});
 
 let autoConvert = true; // 默认开启自动转换
 const converter = OpenCC.Converter({ from: 'cn', to: 'hk' });
@@ -56,10 +110,24 @@ async function updateTraditionalText() {
         // 更新繁体字显示
         nameTraditional.textContent = traditionalName;
         titleTraditional.textContent = traditionalTitle;
+
+        // 更新技能名的繁体字
+        skills.forEach(async (skill, index) => {
+            const traditionalSkillName = await converter(skill.name);
+            const skillNameTraditional = document.getElementById(`skill-name-traditional-${index}`);
+            skillNameTraditional.textContent = traditionalSkillName;
+            updateSkill(index, 'name', traditionalSkillName);
+        });
     } else {
         // 如果开关关闭，清空繁体字显示
         nameTraditional.textContent = '';
         titleTraditional.textContent = '';
+        skills.forEach((skill, index) => {
+            const skillNameTraditional = document.getElementById(`skill-name-traditional-${index}`);
+            skillNameTraditional.textContent = '';
+            const skillName = document.getElementById(`skill-name-${index}`).value;
+            updateSkill(index, 'name', skillName);
+        });
     }
     // 在画布中绘制繁体字
     drawCard(); // 重新绘制图卡以包含繁体字
@@ -251,7 +319,7 @@ function drawCardScore(ctx, score) {
 }
 
 function drawCardSkills(ctx, skills, faction) {
-    const maxWidth = cardSize["maxEdge"];//最大边缘宽度
+    const maxWidth = cardSize["verticalEdge"];//最大边缘宽度
     const minWidth = 15;//最小边缘宽度
 
     const maxMaskY = 957;//遮罩最低高度
@@ -272,19 +340,23 @@ function drawCardSkills(ctx, skills, faction) {
     //遮罩区起始Y坐标
     let startY
 
-    if (textAreaHeight <= (bottomMaskY - maxMaskY - 2 * maxWidth)) {
+    let minMaskHeight = bottomMaskY - maxMaskY - 2 * maxWidth
+    let maxMaskHeight = bottomMaskY - maxMaskY - 2 * minWidth
+    if (textAreaHeight <= minMaskHeight) {
         //技能区域小于最小宽度：使用最大边缘宽度
         startY = maxMaskY;
         topEdge = maxWidth;
-    } else if (textAreaHeight > (bottomMaskY - maxMaskY - 2 * maxWidth) && textAreaHeight <= (bottomMaskY - maxMaskY - 2 * minWidth)) {
+    } else if (textAreaHeight > minMaskHeight && textAreaHeight <= maxMaskHeight) {
         //技能区域大于最小宽度，小于未扩展最大宽度：均分上下边框宽度
         startY = maxMaskY;
         topEdge = (bottomMaskY - maxMaskY - textAreaHeight) / 2;
     } else {
         //技能区域大于未扩展最大宽度：向上扩展起始Y坐标
-        startY = maxMaskY - (textAreaHeight - (bottomMaskY - maxMaskY - 2 * minWidth));
+        startY = maxMaskY - (textAreaHeight - maxMaskHeight);
         topEdge = (bottomMaskY - startY - textAreaHeight) / 2;
     }
+
+    //TODO topEdge不足异格标签时需扩展
 
     for (let i = 0; i < skills.length; i++) {
         let skill = skills[i];
@@ -299,12 +371,12 @@ function drawCardSkills(ctx, skills, faction) {
             maskEndY = startY + topEdge + skillHeight + minWidth;
         }
         drawCardSkillMask(ctx, startY, maskEndY, i);
-        drawSkillName(ctx, skill, faction, startY, topEdge);
+        drawSkillName(skill, faction, startY, topEdge);
         skill.effects.forEach(effect => {
-            drawEffectTrigger(ctx, effect, startY, topEdge);
-            let line = drawEffectText(ctx, effect, startY, topEdge, true);
-            startY += line * cardSize["fontSize"] + (line - 1) * 13;
-            topEdge += 13;
+            drawEffectTrigger(effect, startY, topEdge);
+            let line = drawEffectText(ctx, effect, startY, topEdge, true, faction);
+            startY += line * cardSize["fontSize"] + (line - 1) * cardSize["lineHeight"];
+            topEdge += cardSize["lineHeight"];
         })
         startY = maskEndY;
         topEdge = minWidth;
@@ -326,30 +398,49 @@ const factionLineColor = {
     "wei": "rgb(24, 97, 153)", "shu": "rgb(162, 49, 27)", "wu": "rgb(42, 125, 42)", "qun": "rgb(130, 118, 93)"
 }
 
-function drawSkillName(ctx, skill, faction, startY, topEdge) {
+function getSkillNameSize(startY, topEdge) {
+    return {
+        "x": cardSize["horizontalEdge"],
+        "y": startY + topEdge,
+        "width": 128 * cardSize["scale"],
+        "height": 56 * cardSize["scale"],
+    }
+}
+
+function getTriggerIconWidth(text) {
+    ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
+
+    let type = text.substring(0, 2);
+    let count = text.substring(2);
+    let triggerText = type;
+    if (count && parseInt(count) >= 1 && parseInt(count) <= 10) {
+        triggerText += numberCounter[parseInt(count) - 1];
+    }
+
+    let textWidth = ctx.measureText(triggerText).width;
+    return textWidth + 70 * cardSize["scale"];
+}
+
+function drawSkillNameIcon(startX, startY, skillType, faction, text) {
     let backgroundColor = "black";
     let lineColor = "white";
     let fontColor = "white";
 
-    if (skill.type == "normal") {
+    if (skillType == "normal") {
         backgroundColor = "rgb(250, 236, 193)";
         lineColor = factionLineColor[faction];
         fontColor = "black";
     }
 
-    //技能底框
-    //起始坐标
-    let start = { "x": cardSize["maxEdge"], "y": startY + topEdge };
-
     //技能标签属性
-    let width = 110;
-    let height = 38;
+    let width = 110 * cardSize["scale"];
+    let height = 38 * cardSize["scale"];
     //最右侧顶点额外宽度
-    let triangleWidth = 18;
+    let triangleWidth = 18 * cardSize["scale"];
 
-    let top = { "x": start.x + width, "y": start.y };
-    let bottom = { "x": start.x + width, "y": start.y + height };
-    let right = { "x": start.x + width + triangleWidth, "y": start.y + height / 2 };
+    let top = { "x": startX + width, "y": startY };
+    let bottom = { "x": startX + width, "y": startY + height };
+    let right = { "x": startX + width + triangleWidth, "y": startY + height / 2 };
 
     //阴影属性
     ctx.shadowColor = "black"; // 设置阴影颜色
@@ -359,21 +450,22 @@ function drawSkillName(ctx, skill, faction, startY, topEdge) {
 
     ctx.fillStyle = backgroundColor;
     ctx.beginPath(); // 开始路径
-    ctx.moveTo(start.x, start.y)
+    ctx.moveTo(startX, startY)
     ctx.lineTo(top.x, top.y);
     ctx.lineTo(right.x, right.y);
     ctx.lineTo(bottom.x, bottom.y);
-    ctx.lineTo(start.x, start.y + height);
+    ctx.lineTo(startX, startY + height);
     ctx.closePath();
     ctx.fill();
     resetShadow(ctx);
 
     //内标三角
     ctx.fillStyle = lineColor;
+    insideSize = 7 * cardSize["scale"]
     ctx.beginPath();
-    ctx.moveTo(right.x - triangleWidth, right.y);
-    ctx.lineTo(right.x - triangleWidth - 7, right.y - 7);
-    ctx.lineTo(right.x - triangleWidth - 7, right.y + 7);
+    ctx.moveTo(right.x - 18, right.y);
+    ctx.lineTo(right.x - 18 - insideSize, right.y - insideSize);
+    ctx.lineTo(right.x - 18 - insideSize, right.y + insideSize);
     ctx.closePath();
     ctx.fill();
 
@@ -381,89 +473,129 @@ function drawSkillName(ctx, skill, faction, startY, topEdge) {
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = 2;
     ctx.beginPath(); // 开始路径
-    ctx.moveTo(start.x + 5, start.y); // 移动到起点
-    ctx.lineTo(start.x + 5, start.y + height); // 从起点连接到终点
+    ctx.moveTo(startX + 5, startY); // 移动到起点
+    ctx.lineTo(startX + 5, startY + height); // 从起点连接到终点
     ctx.stroke(); // 绘制路径
 
     ctx.beginPath();
-    ctx.moveTo(start.x, start.y + 5);
+    ctx.moveTo(startX, startY + 5);
     ctx.lineTo(top.x - 5, top.y + 5);
     ctx.lineTo(right.x - 10, right.y);
     ctx.lineTo(bottom.x - 5, bottom.y - 5);
-    ctx.lineTo(start.x, start.y + height - 5);
+    ctx.lineTo(startX, startY + height - 5);
     ctx.stroke();
 
     //文字绘制
     //起始坐标
-    let x = 111;
-    let y = startY + topEdge + 31;
+    let x = startX + width / 6;
+    let y = startY + 31 * cardSize["scale"];
     ctx.font = cardSize["fontSize"] + "px SIMLI";
     ctx.fillStyle = fontColor;
-    ctx.textAlign = "center";
-    ctx.fillText(skill.name, x, y);
+    ctx.textAlign = "left";
+    ctx.fillText(text, x, y);
+    return { "x": startX, "y": startY, "width": width + triangleWidth, "height": height }
 }
 
-function drawEffectTrigger(ctx, effect, startY, topEdge) {
-    let backgroundColor = { "触发": "rgb(55, 100, 200)", "主动": "rgb(175, 0, 0)", "持续": "rgb(41, 129, 74)" }
-    let nums = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"]
+function drawSkillName(skill, faction, startY, topEdge) {
+    return drawSkillNameIcon(cardSize["horizontalEdge"], startY + topEdge, skill.type, faction, skill.name)
+}
 
-    //计算文字宽度
-    ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
-    let text = effect.trigger;
-    if (effect.count > 0) {
-        text += nums[effect.count - 1];
+function drawTriggerIcon(startX, startY, text) {
+    let backgroundColor = { "触发": "rgb(55, 100, 200)", "主动": "rgb(175, 0, 0)", "持续": "rgb(41, 129, 74)" }
+
+    let type = text.substring(0, 2);
+    let count = text.substring(2);
+    let triggerText = type;
+    if (count && parseInt(count) >= 1 && parseInt(count) <= 10) {
+        triggerText += numberCounter[parseInt(count) - 1];
     }
-    let textWidth = ctx.measureText(text).width;
+
+    ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
+    let textWidth = ctx.measureText(triggerText).width;
 
     //绘制矩形
-    let x = 211;
-    let y = startY + topEdge - 2;
-    let width = textWidth + 46;
-    let height = 41;
+    let x = startX + 12 * cardSize["scale"];
+    let y = startY - 2;
+    let width = textWidth + 46 * cardSize["scale"];
+    let height = 41 * cardSize["scale"];
 
-    ctx.fillStyle = backgroundColor[effect.trigger];
+    ctx.fillStyle = backgroundColor[type];
     ctx.fillRect(x, y, width, height);
 
     //绘制半圆
     ctx.beginPath();
-    ctx.arc(x + 6, y + height / 2, 18, Math.PI / 2, Math.PI * 1.5);
+    ctx.arc(x + 6 * cardSize["scale"], y + height / 2, 18 * cardSize["scale"], Math.PI / 2, Math.PI * 1.5);
     ctx.closePath();
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(x + width - 6, y + height / 2, 18, Math.PI * 1.5, Math.PI / 2);
+    ctx.arc(x + width - 6 * cardSize["scale"], y + height / 2, 18 * cardSize["scale"], Math.PI * 1.5, Math.PI / 2);
     ctx.closePath();
     ctx.fill();
 
     //文字绘制
     //起始坐标
-    let textX = 193;
-    let textY = startY + topEdge + 31;
+    let textX = startX - 6;
+    let textY = y + 32 * cardSize["scale"];
 
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
 
     ctx.font = cardSize["fontSize"] + "px HKwawa";
-    ctx.fillText("【", textX, textY);
+    ctx.fillText("【", textX, textY + 1 * cardSize["scale"]);
 
     ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
-    ctx.fillText(text, textX + cardSize["fontSize"] + 4, textY - 2);
+    ctx.fillText(triggerText, textX + cardSize["fontSize"] + 4 * cardSize["scale"], textY);
 
     ctx.font = cardSize["fontSize"] + "px HKwawa";
-    ctx.fillText("】", textX + cardSize["fontSize"] + 8 + textWidth, textY);
+    ctx.fillText("】", textX + cardSize["fontSize"] + 8 * cardSize["scale"] + textWidth, textY + 1 * cardSize["scale"]);
+
+    return { "x": startX, "y": startY, "width": width + 24 * cardSize["scale"], "height": height }
 }
 
-function drawEffectText(ctx, effect, startY, topEdge, fillText) {
+function drawVerticalLine(x) {
+    drawLine(x, 0, x, 3000);
+}
+function drawHorizontalLine(y) {
+    drawLine(0, y, 3000, y);
+}
+function drawLine(x, y, endX, endY) {
+    ctx.beginPath();             // Start a new path
+    ctx.moveTo(x, y);         // Move the pen to the starting point (x=50, y=100)
+    ctx.lineTo(endX, endY);
+    ctx.strokeStyle = 'blue';    // Set the color of the line
+    ctx.lineWidth = 1;           // Set the thickness of the line
+    ctx.stroke();
+}
+
+function drawEffectTrigger(effect, startY, topEdge) {
+    let skillNameSize = getSkillNameSize(startY, topEdge);
+    let skillNameEndX = skillNameSize.x + skillNameSize.width + cardSize["tagSpacing"] * cardSize["scale"];
+
+    let text = getTriggerText(effect)
+
+    return drawTriggerIcon(skillNameEndX, startY + topEdge, text)
+}
+
+function getTriggerText(effect) {
+    let text = effect.trigger;
+    if (effect.count > 0) {
+        text += effect.count;
+    }
+    return text;
+}
+
+function drawEffectText(ctx, effect, startY, topEdge, fillText, faction) {
     ctx.textAlign = "left";
-    const sideEdgeWidth = cardSize["maxEdge"];
-    const x = 351;
-    const y = startY + topEdge + 29;
+    const sideEdgeWidth = cardSize["horizontalEdge"];
+
+    let spacing = cardSize["tagSpacing"] * cardSize["scale"]
+    let skillNameSize = getSkillNameSize(startY, topEdge);
+    let x = skillNameSize.x + skillNameSize.width + 2 * spacing + getTriggerIconWidth(getTriggerText(effect));
+    let y = startY + topEdge;
     let beginX = x;
     let beginY = y;
 
-    if (effect.count > 0) {
-        beginX += cardSize["fontSize"];//发动次数像素偏移
-    }
     let lineNum = 1;
     for (let i = 0; i < effect.description.length;) {
         //重置文字样式
@@ -498,15 +630,63 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
             img = loadedImages["heart"];
         } else if (text == "{玄武}") {
             img = loadedImages["diamond"];
-        }
-        if (img) {
-            if (beginX + cardSize.fontSize > canvas.width - sideEdgeWidth) {
+        } else if (text.includes("主动") || text.includes("持续") || text.includes("触发")) {
+            text = text.replace("{", "").replace("}", "");
+            let iconwidth = getTriggerIconWidth(text)
+            if (beginX + iconwidth > canvas.width - sideEdgeWidth) {
                 beginX = sideEdgeWidth;
-                beginY = beginY + 13 + cardSize["fontSize"];
+                beginY = beginY + cardSize["lineHeight"] + cardSize["fontSize"];
                 lineNum++;
             }
             if (fillText) {
-                ctx.drawImage(img, beginX, beginY - cardSize["fontSize"] + 7, cardSize["fontSize"], cardSize["fontSize"]);
+                drawTriggerIcon(beginX + 4, beginY, text)
+            }
+            beginX += iconwidth + 8;
+            continue;
+        } else if (text.includes("【") && text.includes("】")) {
+            text = text.replace("{", "").replace("}", "");
+            let skillName = extractSkillName(text, "ambuse")
+            if (skillName == null) {
+                continue;
+            }
+            let iconwidth = getSkillNameSize().width
+            if (beginX + iconwidth > canvas.width - sideEdgeWidth) {
+                beginX = sideEdgeWidth;
+                beginY = beginY + cardSize["lineHeight"] + cardSize["fontSize"];
+                lineNum++;
+            }
+            if (fillText) {
+                drawSkillNameIcon(beginX + 4, beginY, "ambuse", faction, skillName)
+            }
+            beginX += iconwidth + 8;
+            continue;
+        } else if (text.includes("〖") && text.includes("〗")) {
+            text = text.replace("{", "").replace("}", "");
+            let skillName = extractSkillName(text, "normal")
+            if (skillName == null) {
+                continue;
+            }
+            let iconwidth = getSkillNameSize().width
+            if (beginX + iconwidth > canvas.width - sideEdgeWidth) {
+                beginX = sideEdgeWidth;
+                beginY = beginY + cardSize["lineHeight"] + cardSize["fontSize"];
+                lineNum++;
+            }
+            if (fillText) {
+                drawSkillNameIcon(beginX + 4, beginY, "normal", faction, skillName)
+            }
+            beginX += iconwidth + 8;
+            continue;
+        }
+
+        if (img) {
+            if (beginX + cardSize.fontSize > canvas.width - sideEdgeWidth) {
+                beginX = sideEdgeWidth;
+                beginY = beginY + cardSize["lineHeight"] + cardSize["fontSize"];
+                lineNum++;
+            }
+            if (fillText) {
+                ctx.drawImage(img, beginX, beginY - cardSize["fontSize"] + 36 * cardSize["scale"], cardSize["fontSize"], cardSize["fontSize"]);
             }
             beginX += cardSize["fontSize"];
             continue;
@@ -519,7 +699,7 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
             //超宽换行
             if (position.x + position.width > canvas.width - sideEdgeWidth) {
                 beginX = sideEdgeWidth;
-                beginY = position.y + position.height + 13 + cardSize["fontSize"];
+                beginY = position.y + position.height + cardSize["lineHeight"] + cardSize["fontSize"];
                 lineNum++;
             }
             position = getTextBounds(ctx, char, beginX, beginY);
@@ -529,17 +709,17 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
                     //起始向左偏移4像素
                     beginX -= 4;
                     //文字向下偏移2像素
-                    ctx.fillText(char, beginX, beginY + 2);
+                    ctx.fillText(char, beginX, beginY + 31 * cardSize["scale"]);
                     ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
                 } else if (char == "】") {
                     ctx.font = cardSize["fontSize"] + "px HKwawa";
                     //起始向右偏移4像素
                     beginX += 4;
                     //文字向下偏移2像素
-                    ctx.fillText(char, beginX, beginY + 2);
+                    ctx.fillText(char, beginX, beginY + 31 * cardSize["scale"]);
                     ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
                 } else {
-                    ctx.fillText(char, beginX, beginY);
+                    ctx.fillText(char, beginX, beginY + 29 * cardSize["scale"]);
                 }
             }
             beginX = position.x + position.width;
@@ -548,12 +728,19 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText) {
     return lineNum;
 }
 
+
+function extractSkillName(text, type) {
+    const regex = type === "ambuse" ? /^【([^】]+)】$/ : /^〖([^〗]+)〗$/;
+    const match = text.match(regex);
+    return match ? match[1] : null;
+}
+
 function getSkillAreaHeight(ctx, skill) {
     let line = 0;
     skill.effects.forEach(effect => {
         line += drawEffectText(ctx, effect, 0, 0, false);
     })
-    return line * cardSize["fontSize"] + (line - 1) * 13;//行高
+    return line * cardSize["fontSize"] + (line - 1) * cardSize["lineHeight"];//行高
 }
 
 function getTextBounds(ctx, text, x, y) {
@@ -732,6 +919,12 @@ function updateSkillList() {
                             <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{白虎}')">草花/白虎</button>
                             <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{朱雀}')">红桃/朱雀</button>
                             <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{玄武}')">方块/玄武</button>
+                            </br>
+                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{〖普通〗}')">普通</button>
+                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{【伏击】}')">伏击</button>
+                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{主动}')">主动</button>
+                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{触发}')">触发</button>
+                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{持续}')">持续</button>
                         </div>
                         <button type="button" class="delete-btn" onclick="removeEffect(${skillIndex}, ${effectIndex})">删除效果</button>
                     </fieldset>
@@ -747,7 +940,10 @@ function updateSkillList() {
                     <label class="radio-label"><input type="radio" name="skill-type-${skillIndex}" value="ambush" ${skill.type === 'ambush' ? 'checked' : ''} oninput="updateSkill(${skillIndex}, 'type', this.value)"> 伏击技能</label>
                     <br>
                     <label for="skill-name-${skillIndex}">技能名称:</label>
-                    <input type="text" id="skill-name-${skillIndex}" value="${skill.name}" oninput="updateSkill(${skillIndex}, 'name', this.value)">
+                    <div class="inline-wrapper">
+                        <input type="text" id="skill-name-${skillIndex}" value="${skill.name}" oninput="updateSkill(${skillIndex}, 'name', this.value); updateTraditionalText();">
+                        <span id="skill-name-traditional-${skillIndex}" class="traditional-output"></span>
+                    </div>
                     <br>
                     ${effects}
                     <br>

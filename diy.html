@@ -7,7 +7,7 @@
     <title>对决DIY</title>
     <link rel="stylesheet" href="new_styles.css">
     <link rel="stylesheet" href="mobile.css">
-    
+
     <script src="webfont_1.6.26.js"></script>
     <script src="opencc-js@1.0.5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -82,6 +82,34 @@
                 <div id="skill-list"></div>
                 <button type="button" id="add-skill">添加技能</button>
 
+                <div class="inline-wrapper auto-convert-container">
+                    <button type="button" id="toggle-sliders">技能样式微调</button>
+                </div>
+
+                <div id="slider-container" class="hidden">
+                    <div class="inline-wrapper auto-convert-container">
+                        <label for="font-size-slider">字体大小：</label><span id="font-size-value">37</span>
+                    </div>
+                    <input type="range" id="font-size-slider" min="22" max="52" value="37">
+
+                    <div class="inline-wrapper auto-convert-container">
+                        <label for="line-height-slider">行间距：</label><span id="line-height-value">13</span>
+                    </div>
+                    <input type="range" id="line-height-slider" min="0" max="26" value="13">
+
+                    <div class="inline-wrapper auto-convert-container">
+                        <label for="horizontal-edge-size-slider">水平边距：</label><span
+                            id="horizontal-edge-size-value">55</span>
+                    </div>
+                    <input type="range" id="horizontal-edge-size-slider" min="10" max="100" value="55">
+
+                    <!-- <div class="inline-wrapper auto-convert-container">
+                        <label for="vertical-edge-size-slider">垂直边距：</label><span id="vertical-edge-size-value">55</span>
+                    </div>
+                    <input type="range" id="vertical-edge-size-slider" min="10" max="100" value="55">
+                -->
+                </div>
+
                 <label for="designer">设计者：</label>
                 <input type="text" id="designer" value="™&© 2024 游卡桌游 .画师：">
 
@@ -98,7 +126,7 @@
                     </div>
                 </div>
                 <div class="footer">
-                    Powered by <a href="https://space.bilibili.com/6839" target="_blank">@Inku</a>&emsp; 
+                    Powered by <a href="https://space.bilibili.com/6839" target="_blank">@Inku</a>&emsp;
                     素材提供：<a href="https://space.bilibili.com/4206074" target="_blank">@瞳木水杉</a>
                 </div>
             </form>

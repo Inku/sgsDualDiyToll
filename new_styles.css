@@ -99,9 +99,11 @@ body {
 }
 
 .container {
+    display: flex;
+    flex-direction: row;
+    height:88vh;
     width: 100%;
     max-width: 1200px;
-    display: flex;
     background-color: white;
     padding: 20px;
     border-radius: 10px;
@@ -149,7 +151,7 @@ legend {
 
 #canvas-container {
     position: relative;
-    width: 620px;
+    width: 560px;
     max-width: 100%;
     padding-top: 140.34%;
 }
@@ -231,6 +233,7 @@ input[type="number"] {
     gap: 15px;
     padding: 0 50px;
     max-height: 842px;
+    overflow-y: auto;
 }
 
 .editor>* {
@@ -421,4 +424,9 @@ input[type="file"] {
 .custom-divider {
     border-top: 2px solid #ccc;
     margin: 20px 0;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin: 10px 0;
 }
