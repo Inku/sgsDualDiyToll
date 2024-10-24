@@ -120,11 +120,11 @@ async function updateTraditionalText() {
         });
     } else {
         // 如果开关关闭，清空繁体字显示
-        nameTraditional.textContent = '';
-        titleTraditional.textContent = '';
+        // nameTraditional.textContent = '';
+        // titleTraditional.textContent = '';
         skills.forEach((skill, index) => {
-            const skillNameTraditional = document.getElementById(`skill-name-traditional-${index}`);
-            skillNameTraditional.textContent = '';
+            // const skillNameTraditional = document.getElementById(`skill-name-traditional-${index}`);
+            // skillNameTraditional.textContent = '';
             const skillName = document.getElementById(`skill-name-${index}`).value;
             updateSkill(index, 'name', skillName);
         });
