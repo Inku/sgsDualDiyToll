@@ -29,11 +29,25 @@
         <div class="editor">
             <form class="form">
                 <fieldset>
+                    <legend>常规/异格:</legend>
+                    <label class="radio-label"><input type="radio" name="version" value="regular" checked>常规</label>
+                    <label class="radio-label"><input type="radio" name="version" value="special">异格</label>
+                </fieldset>
+
+                <fieldset>
                     <legend>势力:</legend>
                     <label class="radio-label"><input type="radio" name="faction" value="wei" checked> 魏</label>
                     <label class="radio-label"><input type="radio" name="faction" value="shu"> 蜀</label>
                     <label class="radio-label"><input type="radio" name="faction" value="wu"> 吴</label>
                     <label class="radio-label"><input type="radio" name="faction" value="qun"> 群</label>
+                </fieldset>
+
+                <fieldset>
+                    <legend>异格环境标记:</legend>
+                    <label class="radio-label"><input type="radio" name="env" value="" checked> 无</label>
+                    <label class="radio-label"><input type="radio" name="env" value="tian"> 天时</label>
+                    <label class="radio-label"><input type="radio" name="env" value="di"> 地利</label>
+                    <label class="radio-label"><input type="radio" name="env" value="ren"> 人和</label>
                 </fieldset>
 
                 <label for="score">分数：</label>

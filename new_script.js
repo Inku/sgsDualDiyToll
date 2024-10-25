@@ -145,26 +145,35 @@ document.getElementById('title').addEventListener('input', updateTraditionalText
 
 function drawCard() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const version = document.querySelector('input[name="version"]:checked').value;
     const faction = document.querySelector('input[name="faction"]:checked').value;
+    const env = document.querySelector('input[name="env"]:checked').value;
     const health = document.getElementById('health').value;
     // 获取繁体字
     const name = autoConvert ? document.getElementById('name-traditional').textContent : document.getElementById('name').value;
     const title = autoConvert ? document.getElementById('title-traditional').textContent : document.getElementById('title').value;
 
     drawCardImg(ctx);
-    drawCardTopBorder(ctx, faction);
+    drawCardTopBorder(ctx, faction, version);
     drawCardHealth(ctx, health, faction);
     drawCardName(ctx, name);
     drawCardTitle(ctx, title);
     drawCardScore(ctx, document.getElementById('score').value);
-    drawCardSkills(ctx, skills, faction);
+    drawCardSkills(ctx, skills, faction, version, env);
     drawCardBottomBorder(ctx, faction, document.getElementById('designer').value, document.getElementById('num').value);
     drawCardQibing(ctx, qiBings, faction);
 }
 
-function drawCardTopBorder(ctx, faction) {
-    const img = loadedImages[`${faction}-top`];
-    ctx.drawImage(img, 0, 0, img.width, img.height);
+function drawCardTopBorder(ctx, faction, version) {
+    let name = `${faction}-top`
+    if (version === "special") {
+        name = `${faction}-top-yige`
+    }
+
+    const img = loadedImages[name];
+    if (img) {
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+    }
 }
 
 function drawCardBottomBorder(ctx, faction, designer, num) {
@@ -318,7 +327,7 @@ function drawCardScore(ctx, score) {
     ctx.fillText(score, x, y);
 }
 
-function drawCardSkills(ctx, skills, faction) {
+function drawCardSkills(ctx, skills, faction, version, env) {
     const maxWidth = cardSize["verticalEdge"];//最大边缘宽度
     const minWidth = 15;//最小边缘宽度
 
@@ -356,7 +365,6 @@ function drawCardSkills(ctx, skills, faction) {
         topEdge = (bottomMaskY - startY - textAreaHeight) / 2;
     }
 
-    //TODO topEdge不足异格标签时需扩展
 
     for (let i = 0; i < skills.length; i++) {
         let skill = skills[i];
@@ -370,7 +378,22 @@ function drawCardSkills(ctx, skills, faction) {
         } else {
             maskEndY = startY + topEdge + skillHeight + minWidth;
         }
+
         drawCardSkillMask(ctx, startY, maskEndY, i);
+        //首层遮罩绘制后绘制环境标签
+        if (i === 0) {
+            if (version === "regular" && env) {
+                let envStartY = startY
+                if (topEdge < 50) {
+                    envStartY=startY - (50 - topEdge)
+                    drawCardSkillMask(ctx,envStartY , startY, i);
+                }
+                const img = loadedImages[env];
+                if (img) {
+                    ctx.drawImage(img, 787, envStartY - 45, img.width, img.height);
+                }
+            }
+        }
         drawSkillName(skill, faction, startY, topEdge);
         skill.effects.forEach(effect => {
             drawEffectTrigger(effect, startY, topEdge);
@@ -1039,25 +1062,32 @@ function loadImages(imageFilenames) {
 
 const imageFilenames = {
     "shu-top": "shu-top.png",
+    "shu-top-yige": "shu-top-yige.png",
     "shu-bottom": "shu-bottom.png",
     "shu-qb-bg": "shu-qb-bg.png",
     "shu-jade": "shu-jade.png",
     "wu-top": "wu-top.png",
+    "wu-top-yige": "wu-top-yige.png",
     "wu-bottom": "wu-bottom.png",
     "wu-qb-bg": "wu-qb-bg.png",
     "wu-jade": "wu-jade.png",
     "wei-top": "wei-top.png",
+    "wei-top-yige": "wei-top-yige.png",
     "wei-bottom": "wei-bottom.png",
     "wei-qb-bg": "wei-qb-bg.png",
     "wei-jade": "wei-jade.png",
     "qun-top": "qun-top.png",
+    "qun-top-yige": "qun-top-yige.png",
     "qun-bottom": "qun-bottom.png",
     "qun-qb-bg": "qun-qb-bg.png",
     "qun-jade": "qun-jade.png",
     "spade": "spade.png",
     "heart": "heart.png",
     "club": "club.png",
-    "diamond": "diamond.png"
+    "diamond": "diamond.png",
+    "tian": "tian.png",
+    "di": "di.png",
+    "ren": "ren.png"
 };
 const loadedImages = {};
 
