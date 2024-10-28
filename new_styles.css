@@ -430,3 +430,90 @@ input[type="range"] {
     width: 100%;
     margin: 10px 0;
 }
+
+.颜色,
+.花色,
+.技能名,
+.效果标签 {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s;
+    font-weight: bold;
+    user-select: none;
+}
+
+.颜色:hover,
+.花色:hover,
+.技能名:hover,
+.效果标签:hover {
+    transform: scale(1.05);
+}
+
+.颜色:active,
+.花色:active,
+.技能名:active,
+.效果标签:active {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    transform: scale(0.95);
+}
+
+.颜色,
+.花色 {
+    background-color: rgb(255, 255, 255);
+}
+
+.颜色:hover,
+.花色:hover {
+    background-color: rgb(255, 255, 255);
+}
+
+.颜色.黑色 {
+    color: rgb(0, 0, 0);
+}
+
+.颜色.红色 {
+    color: rgb(240, 0, 0);
+}
+
+.花色 img {
+    aspect-ratio: 1/1;
+    width: 1em;
+    transform: translateY(0.1em);
+}
+
+.技能名.普通 {
+    background-color: rgb(250, 236, 193);
+    color: rgb(0, 0, 0);
+}
+
+.技能名.伏击 {
+    background-color: rgb(0, 0, 0);
+    color: rgb(255, 255, 255);
+}
+
+.效果标签.主动 {
+    background-color: rgb(55, 100, 200);
+}
+
+.效果标签.触发 {
+    background-color: rgb(175, 0, 0);
+}
+
+.效果标签.持续 {
+    background-color: rgb(41, 129, 74);
+}
+
+.效果标签.奥秘 {
+    background-color: #b761c2;
+}
+
+.效果标签.应变 {
+    background-color: #d1a617;
+}
+
+.效果标签.持恒 {
+    background-color: #00c9a7;
+}
+
+.效果标签.蓄力 {
+    background-color: #bb3f04;
+}

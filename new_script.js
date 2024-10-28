@@ -12,7 +12,7 @@ WebFont.load({
     }
 });
 
-const numberCounter = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"]
+const numberCounter = ["⓪", "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"]
 
 const canvas = document.getElementById('card-canvas');
 const ctx = canvas.getContext('2d');
@@ -32,7 +32,7 @@ function resetShadow(ctx) {
     ctx.shadowColor = 'transparent'; // 清除阴影颜色
     ctx.shadowOffsetX = 0; // 清除阴影在x轴方向上的偏移量
     ctx.shadowOffsetY = 0; // 清除阴影在y轴方向上的偏移量
-    ctx.shadowBlur = 0; // 清除阴影的模糊程度    
+    ctx.shadowBlur = 0; // 清除阴影的模糊程度
 }
 
 const cardSize = {
@@ -373,7 +373,7 @@ function drawCardSkills(ctx, skills, faction, version, env) {
 
         let maskEndY;
         if (i == skills.length - 1) {
-            //最后一个遮罩区覆盖剩余部分   
+            //最后一个遮罩区覆盖剩余部分
             maskEndY = canvas.height;
         } else {
             maskEndY = startY + topEdge + skillHeight + minWidth;
@@ -433,12 +433,27 @@ function getSkillNameSize(startY, topEdge) {
 function getTriggerIconWidth(text) {
     ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
 
-    let type = text.substring(0, 2);
-    let count = text.substring(2);
-    let triggerText = type;
-    if (count && parseInt(count) >= 1 && parseInt(count) <= 10) {
-        triggerText += numberCounter[parseInt(count) - 1];
+    if (text.includes("#")) {
+        text = text.split("#")[0];
     }
+    let lastChar = text[text.length - 1];
+    if (parseInt(lastChar) >= 0 && parseInt(lastChar) <= 9)
+    {
+        var type = text.substring(0, text.length - 1);
+        var count = numberCounter[parseInt(lastChar)];
+    }
+    else if (lastChar == 'X')
+    {
+        var type = text.substring(0, text.length - 1);
+        var count = 'Ⓧ';
+    }
+    else
+    {
+        var type = text;
+        var count = '';
+    }
+
+    let triggerText = type + count;
 
     let textWidth = ctx.measureText(triggerText).width;
     return textWidth + 70 * cardSize["scale"];
@@ -524,14 +539,35 @@ function drawSkillName(skill, faction, startY, topEdge) {
 }
 
 function drawTriggerIcon(startX, startY, text) {
-    let backgroundColor = { "触发": "rgb(55, 100, 200)", "主动": "rgb(175, 0, 0)", "持续": "rgb(41, 129, 74)" }
-
-    let type = text.substring(0, 2);
-    let count = text.substring(2);
-    let triggerText = type;
-    if (count && parseInt(count) >= 1 && parseInt(count) <= 10) {
-        triggerText += numberCounter[parseInt(count) - 1];
+    let backgroundColor = {
+        "触发": "rgb(55, 100, 200)",
+        "主动": "rgb(175, 0, 0)",
+        "持续": "rgb(41, 129, 74)"
     }
+
+    let color = undefined;
+    if (text.includes("#")) {
+        color = '#' + text.split("#")[1];
+        text = text.split("#")[0];
+    }
+    let lastChar = text[text.length - 1];
+    if (parseInt(lastChar) >= 0 && parseInt(lastChar) <= 9) {
+        var type = text.substring(0, text.length - 1);
+        var count = numberCounter[parseInt(lastChar)];
+    }
+    else if (lastChar == 'X') {
+        var type = text.substring(0, text.length - 1);
+        var count = 'Ⓧ';
+    }
+    else {
+        var type = text;
+        var count = '';
+    }
+    if (color == undefined && type in backgroundColor) {
+        color = backgroundColor[type];
+    }
+
+    let triggerText = type + count;
 
     ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
     let textWidth = ctx.measureText(triggerText).width;
@@ -542,7 +578,7 @@ function drawTriggerIcon(startX, startY, text) {
     let width = textWidth + 46 * cardSize["scale"];
     let height = 41 * cardSize["scale"];
 
-    ctx.fillStyle = backgroundColor[type];
+    ctx.fillStyle = color;
     ctx.fillRect(x, y, width, height);
 
     //绘制半圆
@@ -602,7 +638,7 @@ function drawEffectTrigger(effect, startY, topEdge) {
 
 function getTriggerText(effect) {
     let text = effect.trigger;
-    if (effect.count > 0) {
+    if (effect.countEnabled && ((effect.count >= 0 && effect.count <= 9) || effect.count == 'X')) {
         text += effect.count;
     }
     return text;
@@ -653,8 +689,8 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText, faction) {
             img = loadedImages["heart"];
         } else if (text == "{玄武}") {
             img = loadedImages["diamond"];
-        } else if (text.includes("主动") || text.includes("持续") || text.includes("触发")) {
-            text = text.replace("{", "").replace("}", "");
+        } else if (text.includes("{（") && text.includes("）}")) {
+            text = text.replace("{（", "").replace("）}", "");
             let iconwidth = getTriggerIconWidth(text)
             if (beginX + iconwidth > canvas.width - sideEdgeWidth) {
                 beginX = sideEdgeWidth;
@@ -928,26 +964,33 @@ function updateSkillList() {
                         <label class="radio-label"><input type="radio" name="effect-trigger-${skillIndex}-${effectIndex}" value="主动" ${effect.trigger === '主动' ? 'checked' : ''} oninput="updateEffect(${skillIndex}, ${effectIndex}, 'trigger', this.value)"> 主动</label>
                         <label class="radio-label"><input type="radio" name="effect-trigger-${skillIndex}-${effectIndex}" value="持续" ${effect.trigger === '持续' ? 'checked' : ''} oninput="updateEffect(${skillIndex}, ${effectIndex}, 'trigger', this.value)"> 持续</label>
                         <br>
-                        <label>发动次数:</label>
-                        <label><input type="checkbox" id="effect-count-toggle-${skillIndex}-${effectIndex}" oninput="toggleEffectCount(${skillIndex}, ${effectIndex})" ${effect.countEnabled ? 'checked' : ''}> </label>
+                        <label>限制次数</label>
+                        <input type="checkbox" id="effect-count-toggle-${skillIndex}-${effectIndex}-number" oninput="toggleEffectCount(${skillIndex}, ${effectIndex}, false)">
                         <input type="number" id="effect-count-${skillIndex}-${effectIndex}" value="${effect.count}" oninput="updateEffect(${skillIndex}, ${effectIndex}, 'count', this.value)" ${effect.countEnabled ? '' : 'disabled'}>
+                        <label>变量X</label>
+                        <input type="checkbox" id="effect-count-toggle-${skillIndex}-${effectIndex}-X" oninput="toggleEffectCount(${skillIndex}, ${effectIndex}, true)">
                         <br>
                         <label for="effect-description-${skillIndex}-${effectIndex}">效果描述:</label>
                         <br>
                         <textarea rows="3" id="effect-description-${skillIndex}-${effectIndex}" value="${effect.description}" oninput="updateEffect(${skillIndex}, ${effectIndex}, 'description', this.value)">${effect.description}</textarea>
                         <div id="preset-buttons">
-                            <button type="button" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex}, '{黑色}')">黑色</button>
-                            <button type="button" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex}, '{红色}')">红色</button>
-                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{青龙}')">黑桃/青龙</button>
-                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{白虎}')">草花/白虎</button>
-                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{朱雀}')">红桃/朱雀</button>
-                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{玄武}')">方块/玄武</button>
-                            </br>
-                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{〖普通〗}')">普通</button>
-                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{【伏击】}')">伏击</button>
-                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{主动}')">主动</button>
-                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{触发}')">触发</button>
-                            <button type="button"  onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{持续}')">持续</button>
+                            <button type="button" class="颜色 黑色" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex}, '{黑色}')">黑色</button>
+                            <button type="button" class="颜色 红色" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex}, '{红色}')">红色</button>
+                            <button type="button" class="花色" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{青龙}')"><img src="resources/spade.png"/></button>
+                            <button type="button" class="花色" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{白虎}')"><img src="resources/club.png"/></button>
+                            <button type="button" class="花色" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{朱雀}')"><img src="resources/heart.png"/></button>
+                            <button type="button" class="花色" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{玄武}')"><img src="resources/diamond.png"/></button>
+                            <br>
+                            <button type="button" class="技能名 普通" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{〖普通〗}')">普通</button>
+                            <button type="button" class="技能名 伏击" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{【伏击】}')">伏击</button>
+                            <br>
+                            <button type="button" class="效果标签 主动" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{（主动）}')">主动</button>
+                            <button type="button" class="效果标签 触发" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{（触发）}')">触发</button>
+                            <button type="button" class="效果标签 持续" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{（持续）}')">持续</button>
+                            <button type="button" class="效果标签 奥秘" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{（自定#b761c2）}')">自定</button>
+                            <button type="button" class="效果标签 应变" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{（自定#d1a617）}')">自定</button>
+                            <button type="button" class="效果标签 持恒" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{（自定#00c9a7）}')">自定</button>
+                            <button type="button" class="效果标签 蓄力" onclick="appendTextToEffectDescription(${skillIndex}, ${effectIndex},'{（自定#bb3f04）}')">自定</button>
                         </div>
                         <button type="button" class="delete-btn" onclick="removeEffect(${skillIndex}, ${effectIndex})">删除效果</button>
                     </fieldset>
@@ -1017,13 +1060,26 @@ function removeEffect(skillIndex, effectIndex) {
     };
 }
 
-function toggleEffectCount(skillIndex, effectIndex) {
-    const toggle = document.getElementById(`effect-count-toggle-${skillIndex}-${effectIndex}`);
+function toggleEffectCount(skillIndex, effectIndex, X) {
+    const toggle_number = document.getElementById(`effect-count-toggle-${skillIndex}-${effectIndex}-number`);
+    const toggle_X = document.getElementById(`effect-count-toggle-${skillIndex}-${effectIndex}-X`);
     const input = document.getElementById(`effect-count-${skillIndex}-${effectIndex}`);
-    if (toggle.checked) {
+
+    if (X && toggle_X.checked) {
+        toggle_number.checked = false;
+    }
+    if (!X && toggle_number.checked) {
+        toggle_X.checked = false;
+    }
+
+    if (toggle_number.checked) {
         input.removeAttribute('disabled');
         input.value = 1;
         updateEffect(skillIndex, effectIndex, 'count', 1);
+        updateEffect(skillIndex, effectIndex, 'countEnabled', true);
+    } else if (toggle_X.checked) {
+        input.setAttribute('disabled', true);
+        updateEffect(skillIndex, effectIndex, 'count', 'X');
         updateEffect(skillIndex, effectIndex, 'countEnabled', true);
     } else {
         input.setAttribute('disabled', true);
