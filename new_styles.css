@@ -1,13 +1,11 @@
 @font-face {
     font-family: 'simhei';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/simhei.woff2') format('woff2'),
-        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/simhei.woff') format('woff');
+    src: url('https://x0.ifengimg.com/ucms/2024/1213/1ddab50688f622c2686a236695b8e59a.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'SIMLI';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/SIMLI.woff2') format('woff2'),
-        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/SIMLI.woff') format('woff');
+    src: url('https://x0.ifengimg.com/ucms/2024/1213/5decea918cc52ebd2e250b4f09369a3c.woff2') format('woff2');
 }
 
 @font-face {
@@ -17,32 +15,27 @@
 
 @font-face {
     font-family: 'HuaKangXinZhuan';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HuaKangXinZhuan.woff2') format('woff2'),
-        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HuaKangXinZhuan.woff') format('woff');
+    src: url('https://x0.ifengimg.com/ucms/2024/1213/5cf393382916f51d5b0a5dcc6af2c158.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'HanYiTianMaXing';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiTianMaXing.woff2') format('woff2'),
-        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiTianMaXing.woff') format('woff');
+    src: url('https://x0.ifengimg.com/ucms/2024/1213/549a299e0e0e398083de9ce28b08709c.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'HanYiZhongYuan';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiZhongYuan.woff2') format('woff2'),
-        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/HanYiZhongYuan.woff') format('woff');
+    src: url('https://x0.ifengimg.com/ucms/2024/1213/cca4ee3d07232bf0c379010aec512e0a.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'Jxixinkai';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/subset-Jxixinkai.woff2') format('woff2'),
-        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/subset-Jxixinkai.woff') format('woff');
+    src: url('https://x0.ifengimg.com/ucms/2024/1213/071cdbc8a88a7c29c73cc47f02fc7cc4.woff2') format('woff2');
 }
 
 @font-face {
     font-family: 'HKwawa';
-    src: url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/subset-HKwawa.woff2') format('woff2'),
-        url('https://inku-resource-bucket.oss-accelerate.aliyuncs.com/subset-HKwawa.woff') format('woff');
+    src: url('https://x0.ifengimg.com/ucms/2024/1213/c1f803378b0521d08bf6c732fc07e9ed.woff2') format('woff2');
 }
 
 @font-face {

@@ -385,8 +385,8 @@ function drawCardSkills(ctx, skills, faction, version, env) {
             if (version === "regular" && env) {
                 let envStartY = startY
                 if (topEdge < 50) {
-                    envStartY=startY - (50 - topEdge)
-                    drawCardSkillMask(ctx,envStartY , startY, i);
+                    envStartY = startY - (50 - topEdge)
+                    drawCardSkillMask(ctx, envStartY, startY, i);
                 }
                 const img = loadedImages[env];
                 if (img) {
@@ -431,24 +431,25 @@ function getSkillNameSize(startY, topEdge) {
 }
 
 function getTriggerIconWidth(text) {
+    if (text === "无") {
+        return 0;
+    }
+
     ctx.font = cardSize["fontSize"] + "px HanYiZhongYuan";
 
     if (text.includes("#")) {
         text = text.split("#")[0];
     }
     let lastChar = text[text.length - 1];
-    if (parseInt(lastChar) >= 0 && parseInt(lastChar) <= 9)
-    {
+    if (parseInt(lastChar) >= 0 && parseInt(lastChar) <= 9) {
         var type = text.substring(0, text.length - 1);
         var count = numberCounter[parseInt(lastChar)];
     }
-    else if (lastChar == 'X')
-    {
+    else if (lastChar == 'X') {
         var type = text.substring(0, text.length - 1);
         var count = 'Ⓧ';
     }
-    else
-    {
+    else {
         var type = text;
         var count = '';
     }
@@ -632,8 +633,11 @@ function drawEffectTrigger(effect, startY, topEdge) {
     let skillNameEndX = skillNameSize.x + skillNameSize.width + cardSize["tagSpacing"] * cardSize["scale"];
 
     let text = getTriggerText(effect)
-
-    return drawTriggerIcon(skillNameEndX, startY + topEdge, text)
+    if (text === "无") {
+        return { "x": skillNameEndX, "y": startY, "width": 0, "height": 0 }
+    } else {
+        return drawTriggerIcon(skillNameEndX, startY + topEdge, text)
+    }
 }
 
 function getTriggerText(effect) {
@@ -650,7 +654,11 @@ function drawEffectText(ctx, effect, startY, topEdge, fillText, faction) {
 
     let spacing = cardSize["tagSpacing"] * cardSize["scale"]
     let skillNameSize = getSkillNameSize(startY, topEdge);
-    let x = skillNameSize.x + skillNameSize.width + 2 * spacing + getTriggerIconWidth(getTriggerText(effect));
+    let effectText = getTriggerText(effect)
+    let x = skillNameSize.x + skillNameSize.width + 2 * spacing + getTriggerIconWidth(effectText);
+    if (effectText === "无") {
+        x = skillNameSize.x + skillNameSize.width + spacing;
+    }
     let y = startY + topEdge;
     let beginX = x;
     let beginY = y;
@@ -963,6 +971,7 @@ function updateSkillList() {
                         <label class="radio-label"><input type="radio" name="effect-trigger-${skillIndex}-${effectIndex}" value="触发" ${effect.trigger === '触发' ? 'checked' : ''} oninput="updateEffect(${skillIndex}, ${effectIndex}, 'trigger', this.value)"> 触发</label>
                         <label class="radio-label"><input type="radio" name="effect-trigger-${skillIndex}-${effectIndex}" value="主动" ${effect.trigger === '主动' ? 'checked' : ''} oninput="updateEffect(${skillIndex}, ${effectIndex}, 'trigger', this.value)"> 主动</label>
                         <label class="radio-label"><input type="radio" name="effect-trigger-${skillIndex}-${effectIndex}" value="持续" ${effect.trigger === '持续' ? 'checked' : ''} oninput="updateEffect(${skillIndex}, ${effectIndex}, 'trigger', this.value)"> 持续</label>
+                        <label class="radio-label"><input type="radio" name="effect-trigger-${skillIndex}-${effectIndex}" value="无" ${effect.trigger === '无' ? 'checked' : ''} oninput="updateEffect(${skillIndex}, ${effectIndex}, 'trigger', this.value)"> 无</label>
                         <br>
                         <label>限制次数</label>
                         <input type="checkbox" id="effect-count-toggle-${skillIndex}-${effectIndex}-number" oninput="toggleEffectCount(${skillIndex}, ${effectIndex}, false)">
